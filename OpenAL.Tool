@@ -2,7 +2,7 @@ OpenAL Bindings for LinuxAos and WinAos
 
 
 For LinuxAos:
-Compiler.Compile     Unix.OpenAL.Mod ~
+Compiler.Compile     Unix.OpenAL.Mod Unix.OpenALefx.Mod~
 
 For Windows:
 Compiler.Compile Win32.OpenAL.Mod ~
