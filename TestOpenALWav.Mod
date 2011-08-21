@@ -1,7 +1,6 @@
 MODULE TestOpenALWav; (** AUTHOR ""; PURPOSE ""; *)
 
-IMPORT  AL:=OpenAL, SYSTEM, Math, Strings, Kernel, KernelLog,
-	Streams, SoundDevices, WAVCodec, Codecs, Files;
+IMPORT  AL:=OpenAL, SYSTEM, Kernel, KernelLog, SoundDevices, Codecs, Files;
 
 
 VAR  timer: Kernel.Timer;
@@ -12,14 +11,7 @@ VAR
 	source : AL.ALuint;
 	device : AL.ALCdevice;
 	context : AL.ALCcontext;
-  
-	i : LONGINT;
-	res : AL.ALboolean;
-	str: Strings.String;
- 
- 	frequency: LONGINT;
-	size,  freq: AL.ALsizei;
-	loop: AL.ALboolean;
+  	res : AL.ALboolean;
 	srcPos, lstPos: ARRAY [3] OF REAL;
 
 	dres: LONGINT;
@@ -27,11 +19,10 @@ VAR
 	in: Files.Reader;
  	 
 	decoder : Codecs.AudioDecoder;
-	
-	bufferPool : SoundDevices.BufferPool;
 	sbuffer : SoundDevices.Buffer;
 	
 	nofChannels, samplePerSecond, bitsPerSample, samples : LONGINT;
+	istate: AL.ALint;
 		
 BEGIN
 	(* load sound file *)
@@ -71,77 +62,50 @@ BEGIN
 	
 	(*! ************************** *)
 	
-(*    str := AL.ALCGetString(0, AL.ALC_DEVICE_SPECIFIER);
-   KernelLog.String(" ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-*)   
-  device := AL.alcOpenDevice(""); (* use default *)
-(*   str := AL.ALCGetString(device,   AL.ALC_DEFAULT_DEVICE_SPECIFIER);
-   KernelLog.String("ALC_DEFAULT_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-
-  KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-*)
-  context := AL.alcCreateContext(device, 0);
-
-(*  KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-*)
-  res := AL.alcMakeContextCurrent(context);
-(*  KernelLog.String("02-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
-*)
-  AL.alGenBuffers(1, SYSTEM.ADR(buffer));
+	device := AL.alcOpenDevice(""); (* use default *)
   
-(*  IF AL.alIsBuffer(buffer) THEN
-	  KernelLog.String("isbuffer"); KernelLog.Ln; 
-  ELSE
-  	KernelLog.String("isnotbuffer"); KernelLog.Ln; 
-  END;
-*)
-
-
-
+	context := AL.alcCreateContext(device, 0);
+	res := AL.alcMakeContextCurrent(context);
   
-    
-  AL.alBufferData(buffer, AL.AL_FORMAT_MONO8, SYSTEM.ADR(sbuffer.data), samples, samplePerSecond);
-  
-(*  KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; *)
+	AL.alGenBuffers(1, SYSTEM.ADR(buffer));      
+	AL.alBufferData(buffer, AL.AL_FORMAT_MONO8, SYSTEM.ADR(sbuffer.data), samples, samplePerSecond);
 
-  AL.alGenSources(1, SYSTEM.ADR(source));
-(*  IF AL.alIsSource(source) THEN
-	  KernelLog.String("issource"); KernelLog.Ln; 
-  ELSE
-  	KernelLog.String("isnotsource"); KernelLog.Ln; 
-  END;
-*)
+	 AL.alGenSources(1, SYSTEM.ADR(source));
+	AL.alSourcei(source, AL.AL_BUFFER, buffer);
 
-  srcPos := [3.0, 0.0, -3.0];
-
-(* AL.alSourcef(source, AL.AL_PITCH, 1.0);
-AL.alSourcef(source, AL.AL_GAIN, 1.0); *)
- AL.alSourcei(source, AL.AL_BUFFER, buffer);
- AL.alSourcefv(source, AL.AL_POSITION, SYSTEM.ADR(srcPos[0]));
- AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE);
+	(* AL.alSourcef(source, AL.AL_PITCH, 1.0);
+	AL.alSourcef(source, AL.AL_GAIN, 1.0); *)
+	srcPos := [3.0, 0.0, -3.0];
+	AL.alSourcefv(source, AL.AL_POSITION, SYSTEM.ADR(srcPos[0]));
+	(* AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE);*)
  
   
- lstPos := [0.0, 0.0, 0.0];
- AL.alListenerfv(AL.AL_POSITION, SYSTEM.ADR(lstPos[0]));
+	lstPos := [0.0, 0.0, 0.0];
+	AL.alListenerfv(AL.AL_POSITION, SYSTEM.ADR(lstPos[0]));
+	
+	KernelLog.String("-------- Playing ------- "); KernelLog.Ln; 
+	AL.alSourcePlay(source);
 
-AL.alSourcePlay(source);
-
-  timer.Sleep(2000);  
+	AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);
+	KernelLog.String("source state= "); KernelLog.Hex(istate, 4); KernelLog.Ln; 
  
- KernelLog.String("-------- Ok ------- "); KernelLog.Ln; 
+	REPEAT
+		timer.Sleep(10); 
+		KernelLog.Char("x");
+		AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);
+	UNTIL  istate # AL.AL_PLAYING;
+ 	KernelLog.Ln; 
+	KernelLog.String("-------- Finished ------- "); KernelLog.Ln; 
 
-  (* Clear the things *)
-(*  AL.alDeleteSources(1, SYSTEM.ADR(source));
-  KernelLog.String("Deleted Source"); KernelLog.Ln; 
- AL.alDeleteBuffers(1, SYSTEM.ADR(buffer));
-  KernelLog.String("Deleted Buffers"); KernelLog.Ln; 
-*)  
-  res := AL.alcMakeContextCurrent(0);
-    KernelLog.String("Context 0"); KernelLog.Ln; 
-AL.alcDestroyContext(context);
-  AL.alcCloseDevice(device);
- KernelLog.String("closed. "); KernelLog.Ln; 	
+	(* Clear the things *)
+	AL.alDeleteSources(1, SYSTEM.ADR(source));
+	AL.alDeleteBuffers(1, SYSTEM.ADR(buffer));
+ 
+	res := AL.alcMakeContextCurrent(0);
+	AL.alcDestroyContext(context);
+	AL.alcCloseDevice(device);
+
+	KernelLog.String("closed. "); KernelLog.Ln; 	
 END Open;
 
 BEGIN

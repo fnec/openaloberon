@@ -1,8 +1,7 @@
 MODULE OpenALefx; (** AUTHOR "fnecati"; PURPOSE "OpenAL effects library "; *)
-IMPORT SYSTEM, Kernel32,  AL:=OpenAL;
+IMPORT SYSTEM,  AL:=OpenAL;
 
 TYPE 
-	ADDRESS=SYSTEM.ADDRESS;
 	ALint = AL.ALint;
 	ALuint = AL.ALuint;
 	ALsizei = AL.ALsizei;
@@ -684,93 +683,131 @@ CONST
 	  AL_MAX_METERS_PER_UNIT * = MAX(REAL);
 	  AL_DEFAULT_METERS_PER_UNIT * = 1.0;
 
-
-VAR
-	dll: Kernel32.HMODULE;
 	
 	(* Effect object function types. *)
 	
 	(* Filter object function types. *)
 	
 	(* Auxiliary Effect Slot object function types. *)
+TYPE
 
-	  alGenEffects-: PROCEDURE { WINAPI } (n: ALsizei;   effects: PALuint);
-	  alDeleteEffects-: PROCEDURE { WINAPI } (n: ALsizei;  effects: PALuint);
-	alIsEffect-: PROCEDURE { WINAPI } (effect: ALuint): ALboolean;
-	  alEffecti-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  iValue: ALint);
-	  alEffectiv-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  piValues: PALint);
-	  alEffectf-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  flValue: ALfloat);
-	  alEffectfv-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
-	  alGetEffecti-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  VAR piValue: ALint);
-	  alGetEffectiv-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  piValues: PALint);
-	  alGetEffectf-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	  alGetEffectfv-: PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGenEffects = PROCEDURE { WINAPI } (n: ALsizei;   effects: PALuint);
+	  TalDeleteEffects= PROCEDURE { WINAPI } (n: ALsizei;  effects: PALuint);
+	  TalIsEffect = PROCEDURE { WINAPI } (effect: ALuint): ALboolean;
+	  TalEffecti = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  iValue: ALint);
+	  TalEffectiv = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  piValues: PALint);
+	  TalEffectf = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  flValue: ALfloat);
+	  TalEffectfv = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGetEffecti = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  VAR piValue: ALint);
+	  TalGetEffectiv = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  piValues: PALint);
+	  TalGetEffectf = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	  TalGetEffectfv = PROCEDURE { WINAPI } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
 	
-	  alGenFilters-: PROCEDURE { WINAPI } (n: ALsizei;  filters: PALuint);
-	  alDeleteFilters-: PROCEDURE { WINAPI } (n: ALsizei;  filters: PALuint);
-	alIsFilter-: PROCEDURE { WINAPI } (filter: ALuint): ALboolean;
-	  alFilteri-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  iValue: ALint);
-	  alFilteriv-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  piValues: PALint);
-	  alFilterf-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  flValue: ALfloat);
-	  alFilterfv-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
-	  alGetFilteri-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  VAR piValue: ALint);
-	  alGetFilteriv-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  piValues: PALint);
-	  alGetFilterf-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	  alGetFilterfv-: PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGenFilters = PROCEDURE { WINAPI } (n: ALsizei;  filters: PALuint);
+	  TalDeleteFilters = PROCEDURE { WINAPI } (n: ALsizei;  filters: PALuint);
+	  TalIsFilter = PROCEDURE { WINAPI } (filter: ALuint): ALboolean;
+	  TalFilteri = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  iValue: ALint);
+	  TalFilteriv = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  piValues: PALint);
+	  TalFilterf = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  flValue: ALfloat);
+	  TalFilterfv = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGetFilteri = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  VAR piValue: ALint);
+	  TalGetFilteriv = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  piValues: PALint);
+	  TalGetFilterf = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	  TalGetFilterfv = PROCEDURE { WINAPI } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
 	
-	  alGenAuxiliaryEffectSlots-: PROCEDURE { WINAPI } (n: ALsizei;   effectslots: PALuint);
-	  alDeleteAuxiliaryEffectSlots-: PROCEDURE { WINAPI } (n: ALsizei;  effectslots: PALuint);
-	alIsAuxiliaryEffectSlot-: PROCEDURE { WINAPI } (effectslot: ALuint): ALboolean;
-	  alAuxiliaryEffectSloti-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  iValue: ALint);
-	  alAuxiliaryEffectSlotiv-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
-	  alAuxiliaryEffectSlotf-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  flValue: ALfloat);
-	  alAuxiliaryEffectSlotfv-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
-	  alGetAuxiliaryEffectSloti-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  VAR piValue: ALint);
-	  alGetAuxiliaryEffectSlotiv-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
-	  alGetAuxiliaryEffectSlotf-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	  alGetAuxiliaryEffectSlotfv-: PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGenAuxiliaryEffectSlots = PROCEDURE { WINAPI } (n: ALsizei;   effectslots: PALuint);
+	  TalDeleteAuxiliaryEffectSlots = PROCEDURE { WINAPI } (n: ALsizei;  effectslots: PALuint);
+	  TalIsAuxiliaryEffectSlot = PROCEDURE { WINAPI } (effectslot: ALuint): ALboolean;
+	  TalAuxiliaryEffectSloti = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  iValue: ALint);
+	  TalAuxiliaryEffectSlotiv = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
+	  TalAuxiliaryEffectSlotf = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  flValue: ALfloat);
+	  TalAuxiliaryEffectSlotfv = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGetAuxiliaryEffectSloti = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  VAR piValue: ALint);
+	  TalGetAuxiliaryEffectSlotiv = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
+	  TalGetAuxiliaryEffectSlotf = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	  TalGetAuxiliaryEffectSlotfv = PROCEDURE { WINAPI } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+
+(************************ *)
+
+VAR
+	  alGenEffects-: TalGenEffects;
+	  alDeleteEffects-: TalDeleteEffects;
+	  alIsEffect-: TalIsEffect;
+	  alEffecti-: TalEffecti;
+	  alEffectiv-: TalEffectiv;
+	  alEffectf-: TalEffectf;
+	  alEffectfv-: TalEffectfv; 
+	  alGetEffecti-: TalGetEffecti;
+	  alGetEffectiv-: TalGetEffectiv;
+	  alGetEffectf-: TalGetEffectf;
+	  alGetEffectfv-: TalGetEffectfv;
+	
+	  alGenFilters-: TalGenFilters;
+	  alDeleteFilters-: TalDeleteFilters;
+	  alIsFilter-: TalIsFilter;
+	  alFilteri-: TalFilteri;
+	  alFilteriv-: TalFilteriv;
+	  alFilterf-: TalFilterf;
+	  alFilterfv-: TalFilterfv;
+	  alGetFilteri-: TalGetFilteri;
+	  alGetFilteriv-: TalGetFilteriv;
+	  alGetFilterf-: TalGetFilterf;
+	  alGetFilterfv-: TalGetFilterfv;
+	
+	  alGenAuxiliaryEffectSlots-: TalGenAuxiliaryEffectSlots;
+	  alDeleteAuxiliaryEffectSlots-: TalDeleteAuxiliaryEffectSlots;
+	  alIsAuxiliaryEffectSlot-: TalIsAuxiliaryEffectSlot;
+	  alAuxiliaryEffectSloti-: TalAuxiliaryEffectSloti;
+	  alAuxiliaryEffectSlotiv-: TalAuxiliaryEffectSlotiv;
+	  alAuxiliaryEffectSlotf-:  TalAuxiliaryEffectSlotf;
+	  alAuxiliaryEffectSlotfv-: TalAuxiliaryEffectSlotfv;
+	  alGetAuxiliaryEffectSloti-: TalGetAuxiliaryEffectSloti;
+	  alGetAuxiliaryEffectSlotiv-: TalGetAuxiliaryEffectSlotiv;
+	  alGetAuxiliaryEffectSlotf-: TalGetAuxiliaryEffectSlotf;
+	  alGetAuxiliaryEffectSlotfv-: TalGetAuxiliaryEffectSlotfv;
+
 
 PROCEDURE Init;
 BEGIN
-		Kernel32.GetProcAddress(dll, "alGenEffects", SYSTEM.VAL(LONGINT, alGenEffects));
-		Kernel32.GetProcAddress(dll, "alDeleteEffects", SYSTEM.VAL(LONGINT, alDeleteEffects));
-		Kernel32.GetProcAddress(dll, "alIsEffect", SYSTEM.VAL(LONGINT, alIsEffect));
-		Kernel32.GetProcAddress(dll, "alEffecti", SYSTEM.VAL(LONGINT, alEffecti));
-		Kernel32.GetProcAddress(dll, "alEffectiv", SYSTEM.VAL(LONGINT, alEffectiv));
-		Kernel32.GetProcAddress(dll, "alEffectf", SYSTEM.VAL(LONGINT, alEffectf));
-		Kernel32.GetProcAddress(dll, "alEffectfv", SYSTEM.VAL(LONGINT, alEffectfv));
-		Kernel32.GetProcAddress(dll, "alGetEffecti", SYSTEM.VAL(LONGINT, alGetEffecti));
-		Kernel32.GetProcAddress(dll, "alGetEffectiv", SYSTEM.VAL(LONGINT, alGetEffectiv));
-		Kernel32.GetProcAddress(dll, "alGetEffectf", SYSTEM.VAL(LONGINT, alGetEffectf));
-		Kernel32.GetProcAddress(dll, "alGetEffectfv", SYSTEM.VAL(LONGINT, alGetEffectfv));
 		
-		Kernel32.GetProcAddress(dll, "alGenFilters", SYSTEM.VAL(LONGINT, alGenFilters));
-		Kernel32.GetProcAddress(dll, "alDeleteFilters", SYSTEM.VAL(LONGINT, alDeleteFilters));
-		Kernel32.GetProcAddress(dll, "alIsFilter", SYSTEM.VAL(LONGINT, alIsFilter));
-		Kernel32.GetProcAddress(dll, "alFilteri", SYSTEM.VAL(LONGINT, alFilteri));
-		Kernel32.GetProcAddress(dll, "alFilteriv", SYSTEM.VAL(LONGINT, alFilteriv));
-		Kernel32.GetProcAddress(dll, "alFilterf", SYSTEM.VAL(LONGINT, alFilterf));
-		Kernel32.GetProcAddress(dll, "alFilterfv", SYSTEM.VAL(LONGINT, alFilterfv));
-		Kernel32.GetProcAddress(dll, "alGetFilteri", SYSTEM.VAL(LONGINT, alGetFilteri));
-		Kernel32.GetProcAddress(dll, "alGetFilteriv", SYSTEM.VAL(LONGINT, alGetFilteriv));
-		Kernel32.GetProcAddress(dll, "alGetFilterf", SYSTEM.VAL(LONGINT, alGetFilterf));
-		Kernel32.GetProcAddress(dll, "alGetFilterfv", SYSTEM.VAL(LONGINT, alGetFilterfv));
+		alGenEffects := SYSTEM.VAL(TalGenEffects, AL.alGetProcAddress("alGenEffects"));
+		alDeleteEffects := SYSTEM.VAL(TalDeleteEffects, AL.alGetProcAddress("alDeleteEffects"));
+		alIsEffect := SYSTEM.VAL(TalIsEffect, AL.alGetProcAddress("alIsEffect"));
+		alEffecti := SYSTEM.VAL(TalEffecti, AL.alGetProcAddress("alEffecti"));
+		alEffectiv := SYSTEM.VAL(TalEffectiv, AL.alGetProcAddress("alEffectiv"));
+		alEffectf := SYSTEM.VAL(TalEffectf, AL.alGetProcAddress("alEffectf"));
+		alEffectfv := SYSTEM.VAL(TalEffectfv, AL.alGetProcAddress("alEffectfv"));
+		alGetEffecti := SYSTEM.VAL(TalGetEffecti, AL.alGetProcAddress("alGetEffecti"));
+		alGetEffectiv := SYSTEM.VAL(TalGetEffectiv, AL.alGetProcAddress("alGetEffectiv"));
+		alGetEffectf := SYSTEM.VAL(TalGetEffectf, AL.alGetProcAddress("alGetEffectf"));
+		alGetEffectfv := SYSTEM.VAL(TalGetEffectfv, AL.alGetProcAddress("alGetEffectfv"));
 		
-		Kernel32.GetProcAddress(dll, "alGenAuxiliaryEffectSlots", SYSTEM.VAL(LONGINT, alGenAuxiliaryEffectSlots));
-		Kernel32.GetProcAddress(dll, "alDeleteAuxiliaryEffectSlots", SYSTEM.VAL(LONGINT, alDeleteAuxiliaryEffectSlots));
-		Kernel32.GetProcAddress(dll, "alIsAuxiliaryEffectSlot", SYSTEM.VAL(LONGINT, alIsAuxiliaryEffectSlot));
-		Kernel32.GetProcAddress(dll, "alAuxiliaryEffectSloti", SYSTEM.VAL(LONGINT, alAuxiliaryEffectSloti));
-		Kernel32.GetProcAddress(dll, "alAuxiliaryEffectSlotiv", SYSTEM.VAL(LONGINT, alAuxiliaryEffectSlotiv));
-		Kernel32.GetProcAddress(dll, "alAuxiliaryEffectSlotf", SYSTEM.VAL(LONGINT, alAuxiliaryEffectSlotf));
-		Kernel32.GetProcAddress(dll, "alAuxiliaryEffectSlotfv", SYSTEM.VAL(LONGINT, alAuxiliaryEffectSlotfv));
-		Kernel32.GetProcAddress(dll, "alGetAuxiliaryEffectSloti", SYSTEM.VAL(LONGINT, alGetAuxiliaryEffectSloti));
-		Kernel32.GetProcAddress(dll, "alGetAuxiliaryEffectSlotiv", SYSTEM.VAL(LONGINT, alGetAuxiliaryEffectSlotiv));
-		Kernel32.GetProcAddress(dll, "alGetAuxiliaryEffectSlotf", SYSTEM.VAL(LONGINT, alGetAuxiliaryEffectSlotf));
-		Kernel32.GetProcAddress(dll, "alGetAuxiliaryEffectSlotfv", SYSTEM.VAL(LONGINT, alGetAuxiliaryEffectSlotfv));
+		alGenFilters := SYSTEM.VAL(TalGenFilters, AL.alGetProcAddress("alGenFilters"));
+		alDeleteFilters := SYSTEM.VAL(TalDeleteFilters, AL.alGetProcAddress("alDeleteFilters"));
+		alIsFilter := SYSTEM.VAL(TalIsFilter, AL.alGetProcAddress("alIsFilter"));
+		alFilteri := SYSTEM.VAL(TalFilteri, AL.alGetProcAddress("alFilteri"));
+		alFilteriv := SYSTEM.VAL(TalFilteriv, AL.alGetProcAddress("alFilteriv"));
+		alFilterf := SYSTEM.VAL(TalFilterf, AL.alGetProcAddress("alFilterf"));
+		alFilterfv := SYSTEM.VAL(TalFilterfv, AL.alGetProcAddress("alFilterfv"));
+		alGetFilteri := SYSTEM.VAL(TalGetFilteri, AL.alGetProcAddress("alGetFilteri"));
+		alGetFilteriv := SYSTEM.VAL(TalGetFilteriv, AL.alGetProcAddress("alGetFilteriv"));
+		alGetFilterf := SYSTEM.VAL(TalGetFilterf, AL.alGetProcAddress("alGetFilterf"));
+		alGetFilterfv := SYSTEM.VAL(TalGetFilterfv, AL.alGetProcAddress("alGetFilterfv"));
+		
+		alGenAuxiliaryEffectSlots := SYSTEM.VAL(TalGenAuxiliaryEffectSlots, AL.alGetProcAddress("alGenAuxiliaryEffectSlots"));
+		alDeleteAuxiliaryEffectSlots := SYSTEM.VAL(TalDeleteAuxiliaryEffectSlots, AL.alGetProcAddress("alDeleteAuxiliaryEffectSlots"));
+		alIsAuxiliaryEffectSlot := SYSTEM.VAL(TalIsAuxiliaryEffectSlot, AL.alGetProcAddress("alIsAuxiliaryEffectSlot"));
+		alAuxiliaryEffectSloti := SYSTEM.VAL(TalAuxiliaryEffectSloti, AL.alGetProcAddress("alAuxiliaryEffectSloti"));
+		alAuxiliaryEffectSlotiv := SYSTEM.VAL(TalAuxiliaryEffectSlotiv, AL.alGetProcAddress("alAuxiliaryEffectSlotiv"));
+		alAuxiliaryEffectSlotf := SYSTEM.VAL(TalAuxiliaryEffectSlotf, AL.alGetProcAddress("alAuxiliaryEffectSlotf"));
+		alAuxiliaryEffectSlotfv := SYSTEM.VAL(TalAuxiliaryEffectSlotfv, AL.alGetProcAddress("alAuxiliaryEffectSlotfv"));
+		alGetAuxiliaryEffectSloti := SYSTEM.VAL(TalGetAuxiliaryEffectSloti, AL.alGetProcAddress("alGetAuxiliaryEffectSloti"));
+		alGetAuxiliaryEffectSlotiv := SYSTEM.VAL(TalGetAuxiliaryEffectSlotiv, AL.alGetProcAddress("alGetAuxiliaryEffectSlotiv"));
+		alGetAuxiliaryEffectSlotf := SYSTEM.VAL(TalGetAuxiliaryEffectSlotf, AL.alGetProcAddress("alGetAuxiliaryEffectSlotf"));
+		alGetAuxiliaryEffectSlotfv := SYSTEM.VAL(TalGetAuxiliaryEffectSlotfv, AL.alGetProcAddress("alGetAuxiliaryEffectSlotfv"));
 						
 END Init;
-	
+
 BEGIN
-dll := AL.dll;
 Init;	
 END OpenALefx.

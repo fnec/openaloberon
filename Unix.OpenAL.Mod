@@ -6,10 +6,12 @@ IMPORT
 CONST libname="libopenal.so";
 
 TYPE
-
+  String256*=ARRAY 256 OF CHAR;
+  PString256*= POINTER TO ARRAY OF String256;
+  
   ADDRESS = SYSTEM.ADDRESS;
-  	
-  ALbyte    * =  CHAR;  (* 1-byte signed *)
+
+ ALbyte    * =  CHAR;  (* 1-byte signed *)
   ALshort   * =  INTEGER;  (* 2-byte signed *)
   ALint     * =  LONGINT;  (* 4-byte signed *)
 
@@ -393,7 +395,7 @@ CONST
 
 VAR
   
-  xlib-: LONGINT;
+  xlib: LONGINT;
   
 (* Renderer State management *)	
 alEnable-: PROCEDURE { C } (capability : ALenum);
@@ -408,7 +410,7 @@ alGetFloat-: PROCEDURE { C } (param : ALenum) : ALfloat;
 alGetDouble-: PROCEDURE { C } (param : ALenum) : ALdouble;
 alGetBooleanv-: PROCEDURE { C } (param : ALenum; VAR data : ALboolean);
 alGetIntegerv-: PROCEDURE { C } (param : ALenum; VAR data : ALint);
-alGetFloatv-: PROCEDURE { C } (param : ALenum; VAR data : ALfloat);
+alGetFloatv-: PROCEDURE { C } (param : ALenum;  VAR data : ALfloat);
 alGetDoublev-: PROCEDURE { C } (param : ALenum; VAR data : ALdouble);
 alGetString-: PROCEDURE { C } (param : ALenum) : PALubyte;
 (*
@@ -423,7 +425,7 @@ alGetError-: PROCEDURE { C } () : ALenum;
  * function pointers and enum values.
  *)
 alIsExtensionPresent-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR) : ALboolean;
-alGetProcAddress-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR);
+alGetProcAddress-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR): ADDRESS;
 alGetEnumValue-: PROCEDURE { C } (VAR ename : ALubyte) : ALenum;
 
 (* Set Listener parameters *)
@@ -525,8 +527,8 @@ alSourceStop-: PROCEDURE { C } (source : ALuint);
 alSourceRewind-: PROCEDURE { C }  (source : ALuint);
 
 (*  Source Queuing  *)
-alSourceQueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; VAR buffers : ALuint);
-alSourceUnqueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; VAR buffers : ALuint);
+alSourceQueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; buffers : PALuint);
+alSourceUnqueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; buffers : PALuint);
 
 (**
  * BUFFER
@@ -578,7 +580,7 @@ alDopplerVelocity-: PROCEDURE { C } (value : ALfloat);
 
 (* Device Management *)
 alcOpenDevice-: PROCEDURE { C } (CONST deviceName : ARRAY OF CHAR) : ALCdevice;
-alcCloseDevice-: PROCEDURE { C } (VAR device : ALCdevice);
+alcCloseDevice-: PROCEDURE { C } (device : ALCdevice);
 (* Context Management *)
 alcCreateContext-: PROCEDURE { C } (device : ALCdevice; attrList : PALCint) : ALCcontext;
 alcMakeContextCurrent-: PROCEDURE { C } ( context : ALCcontext) : ALCboolean;
@@ -592,7 +594,7 @@ alcDestroyContext-: PROCEDURE { C } (context : ALCcontext);
  (* Error support.
  * Obtain the most recent Context error
  *)
-alcGetError-: PROCEDURE { C } (VAR device : ALCdevice) : ALCenum;
+alcGetError-: PROCEDURE { C } (device : ALCdevice) : ALCenum;
 
 
 (* 
@@ -601,29 +603,30 @@ alcGetError-: PROCEDURE { C } (VAR device : ALCdevice) : ALCenum;
  * function pointers and enum values.
  *)
 alcIsExtensionPresent- : PROCEDURE { C } (device : ALCdevice; CONST extName : ARRAY OF CHAR) : ALCboolean;
-alcGetProcAddress-: PROCEDURE { C } (device : ALCdevice; CONST funcName:  ARRAY OF CHAR);
+alcGetProcAddress-: PROCEDURE { C } (device : ALCdevice; CONST funcName:  ARRAY OF CHAR): ADDRESS;
 alcGetEnumValue-: PROCEDURE { C } (device : ALCdevice; VAR enumName : ALCubyte) : ALCenum;
 
 
 
 
 (* Query functions *)
-alcGetString-: PROCEDURE { C } (VAR device : ALCdevice; param : ALCenum) : LONGINT;
-alcGetIntegerv -: PROCEDURE { C } ( VAR device : ALCdevice; param : ALCenum; size : ALCsizei;  data : PALCint);
+alcGetString-: PROCEDURE { C } (device : ALCdevice; param : ALCenum) : LONGINT;
+alcGetIntegerv -: PROCEDURE { C } ( device : ALCdevice; param : ALCenum; size : ALCsizei;  data : PALCint);
 
 (* Capture functions *)
 alcCaptureOpenDevice-:  PROCEDURE { C } (CONST devicename: ARRAY OF CHAR; frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
-alcCaptureCloseDevice-: PROCEDURE { C } (VAR device: ALCdevice): ALCboolean;
-alcCaptureStart-:  PROCEDURE { C } (VAR device: ALCdevice); 
-alcCaptureStop-: PROCEDURE { C } (VAR device: ALCdevice); 
-alcCaptureSamples-: PROCEDURE { C } (VAR device: ALCdevice; buffer: ADDRESS; samples: ALCsizei);
+alcCaptureCloseDevice-: PROCEDURE { C } (device: ALCdevice): ALCboolean;
+alcCaptureStart-:  PROCEDURE { C } (device: ALCdevice); 
+alcCaptureStop-: PROCEDURE { C } (device: ALCdevice); 
+alcCaptureSamples-: PROCEDURE { C } (device: ALCdevice; buffer: ADDRESS; samples: ALCsizei);
 
-
+(*
 (* extensions *)
 alBufferDataStatic-: PROCEDURE { C } (buffer: ALint; format: ALenum; data: ADDRESS; lenx: ALsizei;  freq: ALsizei);
 alcSetThreadContext-: PROCEDURE { C }(context: ALCcontext ): ALCboolean;
 alcGetThreadContext-: PROCEDURE { C } (): ALCcontext;
 alBufferSubDataSOFT-: PROCEDURE { C } (buffer: ALuint; format: ALenum; data: ADDRESS; offset: ALsizei; lengthx: ALsizei);
+*)
 	
 PROCEDURE LoadFunctions;
 BEGIN 
@@ -739,12 +742,13 @@ BEGIN
 		Unix.Dlsym( xlib, "alcCaptureStop", SYSTEM.VAL( ADDRESS, alcCaptureStop));
 		Unix.Dlsym( xlib, "alcCaptureSamples", SYSTEM.VAL( ADDRESS, alcCaptureSamples));
 
+(*
 		(* extensions *)
 		Unix.Dlsym( xlib, "alBufferDataStatic", SYSTEM.VAL( ADDRESS, alBufferDataStatic));
 		Unix.Dlsym( xlib, "alcSetThreadContext", SYSTEM.VAL( ADDRESS, alcSetThreadContext));
 		Unix.Dlsym( xlib, "alcGetThreadContext", SYSTEM.VAL( ADDRESS, alcGetThreadContext));
 		Unix.Dlsym( xlib, "alBufferSubDataSOFT", SYSTEM.VAL( ADDRESS, alBufferSubDataSOFT)); 
-		
+*)		
 
 END LoadFunctions;
 
@@ -804,6 +808,78 @@ BEGIN
 	sadr := alcGetString(device, name);
 	RETURN GetStringFromAddr(sadr);	
 END ALCGetString;
+
+
+PROCEDURE GetDevStringFromAddr(adr: LONGINT): Strings.String;
+VAR  sadr, sadr1: LONGINT;
+		i, cnt: LONGINT;
+		ch: CHAR;
+		s: Strings.String;
+BEGIN
+	sadr := adr;
+	
+	(* find length *)
+	cnt :=0;
+	sadr1 := sadr;
+	IF sadr1 # 0 THEN 
+		SYSTEM.GET(sadr1,ch);
+		WHILE (ch # 0X) DO  INC(cnt); INC(sadr1); SYSTEM.GET(sadr1,ch); END;
+	END;
+	
+	IF cnt = 0 THEN  (* empty string or end of list *)	
+		RETURN NIL
+	END; 
+
+	(* copy chars to string *)
+	NEW(s, cnt+1);
+	i:=0;
+	sadr1 := sadr;
+	SYSTEM.GET(sadr1,ch);
+	WHILE (i< cnt) & (ch # 0X) DO
+		s^[i] := ch; INC(i); INC(sadr1);
+		SYSTEM.GET(sadr1,ch);
+	END;
+	RETURN s;	
+	
+END GetDevStringFromAddr;
+
+(** go through device list,  (each device terminated with a single NULL, list terminated with double NULL *)
+PROCEDURE ALCGetDeviceList*(device: ALCdevice; name: ALCenum): PString256;
+VAR  sadr, sadr0: LONGINT;
+	slen, index: LONGINT;
+	str: Strings.String;
+	dynstr: PString256;
+BEGIN
+
+		(* count the number of devices in the list *)
+		sadr0 := alcGetString(device, name);
+		sadr := sadr0;
+		str := GetDevStringFromAddr(sadr);
+		index := 0;
+		WHILE (str  # NIL) & (index<10)  DO (* limit the count *)
+      			slen := Strings.Length(str^);
+			sadr := sadr + slen +1;
+			str := GetDevStringFromAddr(sadr);
+			INC(index);
+		END;
+
+
+		(* copy to string list *)		
+		NEW(dynstr, index);
+		sadr0 := alcGetString(device, name);
+		sadr := sadr0;
+		str := GetDevStringFromAddr(sadr);
+		index := 0;
+		WHILE (str  # NIL) & (index<10)  DO
+		       COPY(str^, dynstr^[index]);
+      			slen := Strings.Length(str^);
+			sadr := sadr + slen +1;
+			str := GetDevStringFromAddr(sadr);
+			INC(index);
+		END;
+				
+	RETURN dynstr;	
+END ALCGetDeviceList;
 
 	
 BEGIN

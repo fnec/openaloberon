@@ -1,8 +1,8 @@
 MODULE OpenALefx; (** AUTHOR "fnecati"; PURPOSE "OpenAL effects library "; *)
-IMPORT SYSTEM, Unix,  AL:=OpenAL;
+IMPORT SYSTEM,  AL:=OpenAL;
 
 TYPE 
-	ADDRESS=SYSTEM.ADDRESS;
+
 	ALint = AL.ALint;
 	ALuint = AL.ALuint;
 	ALsizei = AL.ALsizei;
@@ -685,92 +685,130 @@ CONST
 	  AL_DEFAULT_METERS_PER_UNIT * = 1.0;
 
 
-VAR
-	xlib: LONGINT;
 	
 	(* Effect object function types. *)
 	
 	(* Filter object function types. *)
 	
 	(* Auxiliary Effect Slot object function types. *)
+TYPE
 
-	  alGenEffects-: PROCEDURE { C } (n: ALsizei;   effects: PALuint);
-	  alDeleteEffects-: PROCEDURE { C } (n: ALsizei;  effects: PALuint);
-	alIsEffect-: PROCEDURE { C } (effect: ALuint): ALboolean;
-	  alEffecti-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  iValue: ALint);
-	  alEffectiv-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  piValues: PALint);
-	  alEffectf-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  flValue: ALfloat);
-	  alEffectfv-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
-	  alGetEffecti-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  VAR piValue: ALint);
-	  alGetEffectiv-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  piValues: PALint);
-	  alGetEffectf-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	  alGetEffectfv-: PROCEDURE { C } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGenEffects = PROCEDURE { C } (n: ALsizei;   effects: PALuint);
+	  TalDeleteEffects= PROCEDURE { C } (n: ALsizei;  effects: PALuint);
+	  TalIsEffect = PROCEDURE { C } (effect: ALuint): ALboolean;
+	  TalEffecti = PROCEDURE { C } (effect: ALuint;  param: ALenum;  iValue: ALint);
+	  TalEffectiv = PROCEDURE { C } (effect: ALuint;  param: ALenum;  piValues: PALint);
+	  TalEffectf = PROCEDURE { C } (effect: ALuint;  param: ALenum;  flValue: ALfloat);
+	  TalEffectfv = PROCEDURE { C } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGetEffecti = PROCEDURE { C } (effect: ALuint;  param: ALenum;  VAR piValue: ALint);
+	  TalGetEffectiv = PROCEDURE { C } (effect: ALuint;  param: ALenum;  piValues: PALint);
+	  TalGetEffectf = PROCEDURE { C } (effect: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	  TalGetEffectfv = PROCEDURE { C } (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
 	
-	  alGenFilters-: PROCEDURE { C } (n: ALsizei;  filters: PALuint);
-	  alDeleteFilters-: PROCEDURE { C } (n: ALsizei;  filters: PALuint);
-	alIsFilter-: PROCEDURE { C } (filter: ALuint): ALboolean;
-	  alFilteri-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  iValue: ALint);
-	  alFilteriv-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  piValues: PALint);
-	  alFilterf-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  flValue: ALfloat);
-	  alFilterfv-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
-	  alGetFilteri-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  VAR piValue: ALint);
-	  alGetFilteriv-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  piValues: PALint);
-	  alGetFilterf-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	  alGetFilterfv-: PROCEDURE { C } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGenFilters = PROCEDURE { C } (n: ALsizei;  filters: PALuint);
+	  TalDeleteFilters = PROCEDURE { C } (n: ALsizei;  filters: PALuint);
+	  TalIsFilter = PROCEDURE { C } (filter: ALuint): ALboolean;
+	  TalFilteri = PROCEDURE { C } (filter: ALuint;  param: ALenum;  iValue: ALint);
+	  TalFilteriv = PROCEDURE { C } (filter: ALuint;  param: ALenum;  piValues: PALint);
+	  TalFilterf = PROCEDURE { C } (filter: ALuint;  param: ALenum;  flValue: ALfloat);
+	  TalFilterfv = PROCEDURE { C } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGetFilteri = PROCEDURE { C } (filter: ALuint;  param: ALenum;  VAR piValue: ALint);
+	  TalGetFilteriv = PROCEDURE { C } (filter: ALuint;  param: ALenum;  piValues: PALint);
+	  TalGetFilterf = PROCEDURE { C } (filter: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	  TalGetFilterfv = PROCEDURE { C } (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
 	
-	  alGenAuxiliaryEffectSlots-: PROCEDURE { C } (n: ALsizei;   effectslots: PALuint);
-	  alDeleteAuxiliaryEffectSlots-: PROCEDURE { C } (n: ALsizei;  effectslots: PALuint);
-	alIsAuxiliaryEffectSlot-: PROCEDURE { C } (effectslot: ALuint): ALboolean;
-	  alAuxiliaryEffectSloti-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  iValue: ALint);
-	  alAuxiliaryEffectSlotiv-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
-	  alAuxiliaryEffectSlotf-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  flValue: ALfloat);
-	  alAuxiliaryEffectSlotfv-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
-	  alGetAuxiliaryEffectSloti-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  VAR piValue: ALint);
-	  alGetAuxiliaryEffectSlotiv-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
-	  alGetAuxiliaryEffectSlotf-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	  alGetAuxiliaryEffectSlotfv-: PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGenAuxiliaryEffectSlots = PROCEDURE { C } (n: ALsizei;   effectslots: PALuint);
+	  TalDeleteAuxiliaryEffectSlots = PROCEDURE { C } (n: ALsizei;  effectslots: PALuint);
+	  TalIsAuxiliaryEffectSlot = PROCEDURE { C } (effectslot: ALuint): ALboolean;
+	  TalAuxiliaryEffectSloti = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  iValue: ALint);
+	  TalAuxiliaryEffectSlotiv = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
+	  TalAuxiliaryEffectSlotf = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  flValue: ALfloat);
+	  TalAuxiliaryEffectSlotfv = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+	  TalGetAuxiliaryEffectSloti = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  VAR piValue: ALint);
+	  TalGetAuxiliaryEffectSlotiv = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  piValues: PALint);
+	  TalGetAuxiliaryEffectSlotf = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	  TalGetAuxiliaryEffectSlotfv = PROCEDURE { C } (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+
+(************************ *)
+
+VAR
+	  alGenEffects-: TalGenEffects;
+	  alDeleteEffects-: TalDeleteEffects;
+	  alIsEffect-: TalIsEffect;
+	  alEffecti-: TalEffecti;
+	  alEffectiv-: TalEffectiv;
+	  alEffectf-: TalEffectf;
+	  alEffectfv-: TalEffectfv; 
+	  alGetEffecti-: TalGetEffecti;
+	  alGetEffectiv-: TalGetEffectiv;
+	  alGetEffectf-: TalGetEffectf;
+	  alGetEffectfv-: TalGetEffectfv;
+	
+	  alGenFilters-: TalGenFilters;
+	  alDeleteFilters-: TalDeleteFilters;
+	  alIsFilter-: TalIsFilter;
+	  alFilteri-: TalFilteri;
+	  alFilteriv-: TalFilteriv;
+	  alFilterf-: TalFilterf;
+	  alFilterfv-: TalFilterfv;
+	  alGetFilteri-: TalGetFilteri;
+	  alGetFilteriv-: TalGetFilteriv;
+	  alGetFilterf-: TalGetFilterf;
+	  alGetFilterfv-: TalGetFilterfv;
+	
+	  alGenAuxiliaryEffectSlots-: TalGenAuxiliaryEffectSlots;
+	  alDeleteAuxiliaryEffectSlots-: TalDeleteAuxiliaryEffectSlots;
+	  alIsAuxiliaryEffectSlot-: TalIsAuxiliaryEffectSlot;
+	  alAuxiliaryEffectSloti-: TalAuxiliaryEffectSloti;
+	  alAuxiliaryEffectSlotiv-: TalAuxiliaryEffectSlotiv;
+	  alAuxiliaryEffectSlotf-:  TalAuxiliaryEffectSlotf;
+	  alAuxiliaryEffectSlotfv-: TalAuxiliaryEffectSlotfv;
+	  alGetAuxiliaryEffectSloti-: TalGetAuxiliaryEffectSloti;
+	  alGetAuxiliaryEffectSlotiv-: TalGetAuxiliaryEffectSlotiv;
+	  alGetAuxiliaryEffectSlotf-: TalGetAuxiliaryEffectSlotf;
+	  alGetAuxiliaryEffectSlotfv-: TalGetAuxiliaryEffectSlotfv;
 
 PROCEDURE Init;
 BEGIN
-		Unix.Dlsym( xlib, "alGenEffects", SYSTEM.VAL( ADDRESS, alGenEffects));
-		Unix.Dlsym( xlib, "alDeleteEffects", SYSTEM.VAL( ADDRESS, alDeleteEffects));
-		Unix.Dlsym( xlib, "alIsEffect", SYSTEM.VAL( ADDRESS, alIsEffect));
-		Unix.Dlsym( xlib, "alEffecti", SYSTEM.VAL( ADDRESS, alEffecti));
-		Unix.Dlsym( xlib, "alEffectiv", SYSTEM.VAL( ADDRESS, alEffectiv));
-		Unix.Dlsym( xlib, "alEffectf", SYSTEM.VAL( ADDRESS, alEffectf));
-		Unix.Dlsym( xlib, "alEffectfv", SYSTEM.VAL( ADDRESS, alEffectfv));
-		Unix.Dlsym( xlib, "alGetEffecti", SYSTEM.VAL( ADDRESS, alGetEffecti));
-		Unix.Dlsym( xlib, "alGetEffectiv", SYSTEM.VAL( ADDRESS, alGetEffectiv));
-		Unix.Dlsym( xlib, "alGetEffectf", SYSTEM.VAL( ADDRESS, alGetEffectf));
-		Unix.Dlsym( xlib, "alGetEffectfv", SYSTEM.VAL( ADDRESS, alGetEffectfv));
 		
-		Unix.Dlsym( xlib, "alGenFilters", SYSTEM.VAL( ADDRESS, alGenFilters));
-		Unix.Dlsym( xlib, "alDeleteFilters", SYSTEM.VAL( ADDRESS, alDeleteFilters));
-		Unix.Dlsym( xlib, "alIsFilter", SYSTEM.VAL( ADDRESS, alIsFilter));
-		Unix.Dlsym( xlib, "alFilteri", SYSTEM.VAL( ADDRESS, alFilteri));
-		Unix.Dlsym( xlib, "alFilteriv", SYSTEM.VAL( ADDRESS, alFilteriv));
-		Unix.Dlsym( xlib, "alFilterf", SYSTEM.VAL( ADDRESS, alFilterf));
-		Unix.Dlsym( xlib, "alFilterfv", SYSTEM.VAL( ADDRESS, alFilterfv));
-		Unix.Dlsym( xlib, "alGetFilteri", SYSTEM.VAL( ADDRESS, alGetFilteri));
-		Unix.Dlsym( xlib, "alGetFilteriv", SYSTEM.VAL( ADDRESS, alGetFilteriv));
-		Unix.Dlsym( xlib, "alGetFilterf", SYSTEM.VAL( ADDRESS, alGetFilterf));
-		Unix.Dlsym( xlib, "alGetFilterfv", SYSTEM.VAL( ADDRESS, alGetFilterfv));
+		alGenEffects := SYSTEM.VAL(TalGenEffects, AL.alGetProcAddress("alGenEffects"));
+		alDeleteEffects := SYSTEM.VAL(TalDeleteEffects, AL.alGetProcAddress("alDeleteEffects"));
+		alIsEffect := SYSTEM.VAL(TalIsEffect, AL.alGetProcAddress("alIsEffect"));
+		alEffecti := SYSTEM.VAL(TalEffecti, AL.alGetProcAddress("alEffecti"));
+		alEffectiv := SYSTEM.VAL(TalEffectiv, AL.alGetProcAddress("alEffectiv"));
+		alEffectf := SYSTEM.VAL(TalEffectf, AL.alGetProcAddress("alEffectf"));
+		alEffectfv := SYSTEM.VAL(TalEffectfv, AL.alGetProcAddress("alEffectfv"));
+		alGetEffecti := SYSTEM.VAL(TalGetEffecti, AL.alGetProcAddress("alGetEffecti"));
+		alGetEffectiv := SYSTEM.VAL(TalGetEffectiv, AL.alGetProcAddress("alGetEffectiv"));
+		alGetEffectf := SYSTEM.VAL(TalGetEffectf, AL.alGetProcAddress("alGetEffectf"));
+		alGetEffectfv := SYSTEM.VAL(TalGetEffectfv, AL.alGetProcAddress("alGetEffectfv"));
 		
-		Unix.Dlsym( xlib, "alGenAuxiliaryEffectSlots", SYSTEM.VAL( ADDRESS, alGenAuxiliaryEffectSlots));
-		Unix.Dlsym( xlib, "alDeleteAuxiliaryEffectSlots", SYSTEM.VAL( ADDRESS, alDeleteAuxiliaryEffectSlots));
-		Unix.Dlsym( xlib, "alIsAuxiliaryEffectSlot", SYSTEM.VAL( ADDRESS, alIsAuxiliaryEffectSlot));
-		Unix.Dlsym( xlib, "alAuxiliaryEffectSloti", SYSTEM.VAL( ADDRESS, alAuxiliaryEffectSloti));
-		Unix.Dlsym( xlib, "alAuxiliaryEffectSlotiv", SYSTEM.VAL( ADDRESS, alAuxiliaryEffectSlotiv));
-		Unix.Dlsym( xlib, "alAuxiliaryEffectSlotf", SYSTEM.VAL( ADDRESS, alAuxiliaryEffectSlotf));
-		Unix.Dlsym( xlib, "alAuxiliaryEffectSlotfv", SYSTEM.VAL( ADDRESS, alAuxiliaryEffectSlotfv));
-		Unix.Dlsym( xlib, "alGetAuxiliaryEffectSloti", SYSTEM.VAL( ADDRESS, alGetAuxiliaryEffectSloti));
-		Unix.Dlsym( xlib, "alGetAuxiliaryEffectSlotiv", SYSTEM.VAL( ADDRESS, alGetAuxiliaryEffectSlotiv));
-		Unix.Dlsym( xlib, "alGetAuxiliaryEffectSlotf", SYSTEM.VAL( ADDRESS, alGetAuxiliaryEffectSlotf));
-		Unix.Dlsym( xlib, "alGetAuxiliaryEffectSlotfv", SYSTEM.VAL( ADDRESS, alGetAuxiliaryEffectSlotfv));
+		alGenFilters := SYSTEM.VAL(TalGenFilters, AL.alGetProcAddress("alGenFilters"));
+		alDeleteFilters := SYSTEM.VAL(TalDeleteFilters, AL.alGetProcAddress("alDeleteFilters"));
+		alIsFilter := SYSTEM.VAL(TalIsFilter, AL.alGetProcAddress("alIsFilter"));
+		alFilteri := SYSTEM.VAL(TalFilteri, AL.alGetProcAddress("alFilteri"));
+		alFilteriv := SYSTEM.VAL(TalFilteriv, AL.alGetProcAddress("alFilteriv"));
+		alFilterf := SYSTEM.VAL(TalFilterf, AL.alGetProcAddress("alFilterf"));
+		alFilterfv := SYSTEM.VAL(TalFilterfv, AL.alGetProcAddress("alFilterfv"));
+		alGetFilteri := SYSTEM.VAL(TalGetFilteri, AL.alGetProcAddress("alGetFilteri"));
+		alGetFilteriv := SYSTEM.VAL(TalGetFilteriv, AL.alGetProcAddress("alGetFilteriv"));
+		alGetFilterf := SYSTEM.VAL(TalGetFilterf, AL.alGetProcAddress("alGetFilterf"));
+		alGetFilterfv := SYSTEM.VAL(TalGetFilterfv, AL.alGetProcAddress("alGetFilterfv"));
+		
+		alGenAuxiliaryEffectSlots := SYSTEM.VAL(TalGenAuxiliaryEffectSlots, AL.alGetProcAddress("alGenAuxiliaryEffectSlots"));
+		alDeleteAuxiliaryEffectSlots := SYSTEM.VAL(TalDeleteAuxiliaryEffectSlots, AL.alGetProcAddress("alDeleteAuxiliaryEffectSlots"));
+		alIsAuxiliaryEffectSlot := SYSTEM.VAL(TalIsAuxiliaryEffectSlot, AL.alGetProcAddress("alIsAuxiliaryEffectSlot"));
+		alAuxiliaryEffectSloti := SYSTEM.VAL(TalAuxiliaryEffectSloti, AL.alGetProcAddress("alAuxiliaryEffectSloti"));
+		alAuxiliaryEffectSlotiv := SYSTEM.VAL(TalAuxiliaryEffectSlotiv, AL.alGetProcAddress("alAuxiliaryEffectSlotiv"));
+		alAuxiliaryEffectSlotf := SYSTEM.VAL(TalAuxiliaryEffectSlotf, AL.alGetProcAddress("alAuxiliaryEffectSlotf"));
+		alAuxiliaryEffectSlotfv := SYSTEM.VAL(TalAuxiliaryEffectSlotfv, AL.alGetProcAddress("alAuxiliaryEffectSlotfv"));
+		alGetAuxiliaryEffectSloti := SYSTEM.VAL(TalGetAuxiliaryEffectSloti, AL.alGetProcAddress("alGetAuxiliaryEffectSloti"));
+		alGetAuxiliaryEffectSlotiv := SYSTEM.VAL(TalGetAuxiliaryEffectSlotiv, AL.alGetProcAddress("alGetAuxiliaryEffectSlotiv"));
+		alGetAuxiliaryEffectSlotf := SYSTEM.VAL(TalGetAuxiliaryEffectSlotf, AL.alGetProcAddress("alGetAuxiliaryEffectSlotf"));
+		alGetAuxiliaryEffectSlotfv := SYSTEM.VAL(TalGetAuxiliaryEffectSlotfv, AL.alGetProcAddress("alGetAuxiliaryEffectSlotfv"));
 						
 END Init;
 	
 BEGIN
-xlib := AL.xlib;
-Init;	
+	Init;	
 END OpenALefx.

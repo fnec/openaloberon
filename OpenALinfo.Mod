@@ -1,6 +1,8 @@
 MODULE OpenALinfo; (** AUTHOR ""; PURPOSE ""; *)
 
-IMPORT  Commands, AL:=OpenAL, EFX:=OpenALefx, SYSTEM, Math, Strings,  KernelLog, Streams;
+IMPORT  AL:=OpenAL, EFX:=OpenALefx, SYSTEM, Strings,  KernelLog;
+
+TYPE PString256 = AL.PString256;
 
 VAR 
 	str: Strings.String;
@@ -63,19 +65,24 @@ BEGIN
     KernelLog.Ln; 
 END printALInfo;
 
+
 PROCEDURE printEFXInfo(device: AL.ALCdevice );
+TYPE String32=ARRAY 32 OF CHAR;
 VAR
     major, minor, sends: AL.ALCint;
     obj: AL.ALuint ;
     i:LONGINT;
     filters, effects : ARRAY [*] OF AL.ALenum;
-    
+    filterNames: ARRAY 4 OF String32;
+    effectNames: ARRAY 14 OF String32;
 BEGIN    
-    filters :=[
-        EFX.AL_FILTER_LOWPASS, EFX.AL_FILTER_HIGHPASS, EFX.AL_FILTER_BANDPASS,
+    filters :=[ EFX.AL_FILTER_LOWPASS, EFX.AL_FILTER_HIGHPASS, EFX.AL_FILTER_BANDPASS,
         EFX.AL_FILTER_NULL];
+        filterNames[0] := "Low-Pass";
+	filterNames[1] := "High-Pass";
+	filterNames[2] := "Band-Pass";
+	filterNames[3] := "";
    
-   (* char filterNames[] = "Low-pass,High-pass,Band-pass,";*)
     effects := [
         EFX.AL_EFFECT_EAXREVERB, EFX.AL_EFFECT_REVERB, EFX.AL_EFFECT_CHORUS,
         EFX.AL_EFFECT_DISTORTION, EFX.AL_EFFECT_ECHO, EFX.AL_EFFECT_FLANGER,
@@ -83,10 +90,20 @@ BEGIN
         EFX.AL_EFFECT_PITCH_SHIFTER, EFX.AL_EFFECT_RING_MODULATOR, EFX.AL_EFFECT_AUTOWAH,
         EFX.AL_EFFECT_COMPRESSOR, EFX.AL_EFFECT_EQUALIZER, EFX.AL_EFFECT_NULL
     ];
-(*    char effectNames[] = "EAX Reverb,Reverb,Chorus,Distortion,Echo,Flanger,"
-                         "Frequency Shifter,Vocal Morpher,Pitch Shifter,"
-                         "Ring Modulator,Autowah,Compressor,Equalizer,"; *)
- (*   char *current;*)
+    	effectNames[0] := "EAX Reverb";
+    	effectNames[1] := "Reverb";
+    	effectNames[2] := "Chorus";
+    	effectNames[3] := "Distortion";
+    	effectNames[4] := "Echo";
+    	effectNames[5] := "Flanger";
+    	effectNames[6] := "Frequency Shifter";
+    	effectNames[7] := "Vocal Morpher";
+    	effectNames[8] := "Pitch Shifter";
+    	effectNames[9] := "Ring Modulator";
+    	effectNames[10] := "Autowah";
+    	effectNames[11] := "Compressor";
+    	effectNames[12] := "Equalizer";
+    	effectNames[13] := "";
 
     IF ~AL.alcIsExtensionPresent(device, "ALC_EXT_EFX") THEN   
         KernelLog.String("EFX not available"); KernelLog.Ln; 
@@ -111,87 +128,90 @@ IF (checkALErrors(2) # AL.AL_NO_ERROR)       OR
         KernelLog.String("!!! Missing EFX functions !!!"); KernelLog.Ln; 
         RETURN
  END;   
-(*
-    EFX.alGenFilters(1, SYSTEM.ADR(obj));
-    IF (checkALErrors() = AL.AL_NO_ERROR) THEN
-    
-        current = filterNames;
-        for(i = 0;filters[i] != AL_FILTER_NULL;i++)
-        {
-            char *next = strchr(current, ',');
+ 
+(* *************************** *)
+	EFX.alGenFilters(1, SYSTEM.ADR(obj));
+	IF (checkALErrors(3) = AL.AL_NO_ERROR) THEN
+		FOR i := 0 TO LEN(filters,0)-1 DO
+			EFX.alFilteri(obj, EFX.AL_FILTER_TYPE, filters[i]);
+			IF (AL.alGetError() # AL.AL_NO_ERROR) THEN filterNames[i] := "-"; END;
+		END;    
+		EFX.alDeleteFilters(1, SYSTEM.ADR(obj));
+		i := checkALErrors(4);
 
-            EFX.alFilteri(obj, AL_FILTER_TYPE, filters[i]);
-            if(AL.alGetError() = AL.AL_NO_ERROR)
-                current = next+1;
-            else
-                memmove(current, next+1, strlen(next));
-        }
-        EFX.alDeleteFilters(1, SYSTEM.ADR(obj));
-        checkALErrors();
+		KernelLog.String("Supported filters:"); KernelLog.Ln; 
+		FOR i:=0 TO LEN(filterNames,0)-2 DO
+			IF filterNames[i] # "-" THEN KernelLog.String(filterNames[i]); KernelLog.String(", "); END;
+		END;
+		KernelLog.Ln; 
+	END;
+	
+	(* *************************** *)
+	EFX.alGenEffects(1, SYSTEM.ADR(obj));
+	IF (checkALErrors(5) = AL.AL_NO_ERROR) THEN
+		FOR i := 0 TO LEN(effects,0)-1 DO
+			EFX.alEffecti(obj, EFX.AL_EFFECT_TYPE, effects[i]);
+			IF (AL.alGetError() # AL.AL_NO_ERROR) THEN effectNames[i] := "-"; END;
+		END;	
+		EFX.alDeleteEffects(1, SYSTEM.ADR(obj));
+		i:= checkALErrors(6);
 
-        printf("Supported filters:");
-        printList(filterNames, ',');
-    }
-
-    EFX.alGenEffects(1, &obj);
-    if(checkALErrors() = AL.AL_NO_ERROR)
-    {
-        current = effectNames;
-        for(i = 0;effects[i] != AL_EFFECT_NULL;i++)
-        {
-            char *next = strchr(current, ',');
-
-            EFX.alEffecti(obj, AL_EFFECT_TYPE, effects[i]);
-            if(AL.alGetError() = AL.AL_NO_ERROR)
-                current = next+1;
-            else
-                memmove(current, next+1, strlen(next));
-        }
-        EFX.alDeleteEffects(1, SYSTEM.ADR(obj));
-        checkALErrors();
-
-        printf("Supported effects:");
-        printList(effectNames, ',');
-    }
-    *)
+		KernelLog.String("Supported effects:"); KernelLog.Ln; 
+		FOR i:=0 TO LEN(effectNames,0)-2 DO
+			IF effectNames[i] # "-" THEN KernelLog.String(effectNames[i]); KernelLog.String(", "); END;
+		END;
+		KernelLog.Ln;        
+	 END;
 END printEFXInfo;
 
 
 
-PROCEDURE Open*(cmd: Commands.Context);
+PROCEDURE Open*;
 VAR  
   i : LONGINT;
   dname: ARRAY 64 OF CHAR;	
+  dynstr: PString256;
 BEGIN
  
- IF ~ cmd.arg.GetString(dname) THEN dname := "" END;
- 
- KernelLog.String("Available playback devices: "); 
+ KernelLog.String("*****************************************"); KernelLog.Ln; 
+ KernelLog.String("Available playback devices: "); KernelLog.Ln; 
  
   IF AL.alcIsExtensionPresent(0, "ALC_ENUMERATE_ALL_EXT")  THEN
-  	str :=AL.ALCGetString(0, AL.ALC_ALL_DEVICES_SPECIFIER);
-       KernelLog.String(str^); KernelLog.Ln;  
+  	dynstr :=AL.ALCGetDeviceList(0, AL.ALC_ALL_DEVICES_SPECIFIER);
+  	   FOR i:=0 TO LEN(dynstr)-1 DO   
+		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
+	  END;
   ELSE
-  	str := AL.ALCGetString(0, AL.ALC_DEVICE_SPECIFIER);
-       KernelLog.String(str^); KernelLog.Ln;    	
+  	dynstr := AL.ALCGetDeviceList(0, AL.ALC_DEVICE_SPECIFIER);
+  	   FOR i:=0 TO LEN(dynstr)-1 DO   
+		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
+	  END;
   END;
-
-  KernelLog.String("Available capture devices: ");
-  str := AL.ALCGetString(0, AL.ALC_CAPTURE_DEVICE_SPECIFIER);
-  KernelLog.String(str^); KernelLog.Ln; 
-   
- KernelLog.String("Default playback device:");
+ KernelLog.String("*****************************************"); KernelLog.Ln;         
+(* COPY(dynstr^[0], dname);*)
+ 	    
+  KernelLog.String("Available capture devices: "); KernelLog.Ln; 
+  dynstr := AL.ALCGetDeviceList(0, AL.ALC_CAPTURE_DEVICE_SPECIFIER);
+  	   FOR i:=0 TO LEN(dynstr)-1 DO   
+		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
+	  END;
+ KernelLog.String("*****************************************"); KernelLog.Ln;
+    
+ KernelLog.String("Default playback device: ");
  str := AL.ALCGetString(0, AL.ALC_DEFAULT_DEVICE_SPECIFIER);
  KernelLog.String(str^); KernelLog.Ln;
- 
+ (*COPY(str^, dname);*)
+  
  KernelLog.String("Default capture device: ");
  str := AL.ALCGetString(0, AL.ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
  KernelLog.String(str^); KernelLog.Ln;
  
-  device := AL.alcOpenDevice(dname); (* use default *)
+ printALCInfo(0);
+ 
+  device := AL.alcOpenDevice(""); (* use default *)
   IF device = 0 THEN 
 	KernelLog.String("!!! Failed to open ");
-	KernelLog.String(dname); KernelLog.String("default device !!!"); KernelLog.Ln; 
+	KernelLog.String(dname); KernelLog.String(" default device !!!"); KernelLog.Ln; 
 	RETURN
   END;
   
@@ -200,9 +220,9 @@ BEGIN
    str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
    KernelLog.String("** Info for device "); KernelLog.String(str^); KernelLog.String(" **"); KernelLog.Ln; 
    
+  printALCInfo(device);
   
-  
-    printALCInfo(device);
+    
 
     context := AL.alcCreateContext(device, 0);
     
@@ -233,6 +253,7 @@ BEGIN
 END OpenALinfo.
 
 
-OpenALinfo.Open "" ~
+OpenALinfo.Open ~
 
 SystemTools.Free OpenALinfo OpenALefx OpenAL~ 
+

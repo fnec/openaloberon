@@ -14,8 +14,8 @@ VAR
 
   test : ARRAY 1000 OF CHAR;
   z : LONGINT;
-  res : AL.ALboolean;
-
+  res : BOOLEAN;
+  x: REAL;
   str: Strings.String;
 
  freq, bits: LONGINT;
@@ -25,20 +25,25 @@ BEGIN
   FOR z := 0 TO 999 DO
     test[z] := CHR(SHORT(ENTIER(100*Math.sin(z*(2*Math.pi)/50.0)+128)));
   END;  
-   device := AL.alcOpenDevice(""); (* use default *)
+  device := AL.alcOpenDevice(""); (* use default *)
    str := AL.ALCGetString(device,   AL.ALC_DEFAULT_DEVICE_SPECIFIER);
    KernelLog.String("ALC_DEFAULT_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
 
    str := AL.ALCGetString(device,    AL.ALC_DEVICE_SPECIFIER);
    KernelLog.String(" ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-   KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-  
+
+   
+  KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
   context := AL.alcCreateContext(device, 0);
   KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-  
   res := AL.alcMakeContextCurrent(context);
   KernelLog.String("02-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-  KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+
+  str := AL.ALGetString(AL.AL_VERSION); KernelLog.String("AL_VERSION: "); KernelLog.String(str^); KernelLog.Ln; 
+  str := AL.ALGetString(AL.AL_RENDERER); KernelLog.String("AL_RENDERER: ");  KernelLog.String(str^); KernelLog.Ln; 
+  str := AL.ALGetString(AL.AL_VENDOR); KernelLog.String("AL_VENDOR: ");  KernelLog.String(str^); KernelLog.Ln; 
+  str := AL.ALGetString(AL.AL_EXTENSIONS); KernelLog.String("AL_EXTENSIONS: ");  KernelLog.String(str^); KernelLog.Ln; 
 
   AL.alGenBuffers(1, SYSTEM.ADR(buffer));
   AL.alBufferData(buffer, AL.AL_FORMAT_MONO8, SYSTEM.ADR(test), 1000, 40000);
@@ -75,8 +80,8 @@ BEGIN
 
   Kernel.SetTimer(timer, 2000);	
   
-  WHILE ~ Kernel.Expired(timer) DO END; 
-
+  WHILE ~ Kernel.Expired(timer) DO END;
+(*  timer.Sleep(2000);*)
   
  AL.alSourceStop(source); 
  AL.alDeleteSources(1, SYSTEM.ADR(source));
