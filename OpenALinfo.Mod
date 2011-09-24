@@ -1,4 +1,4 @@
-MODULE OpenALinfo; (** AUTHOR ""; PURPOSE ""; *)
+MODULE OpenALinfo; (** AUTHOR "fnecati"; PURPOSE "show OpenAL device infos"; *)
 
 IMPORT  AL:=OpenAL, EFX:=OpenALefx, SYSTEM, Strings,  KernelLog;
 
@@ -166,7 +166,7 @@ END printEFXInfo;
 
 
 
-PROCEDURE Open*;
+PROCEDURE Do*;
 VAR  
   i : LONGINT;
   dname: ARRAY 64 OF CHAR;	
@@ -213,17 +213,13 @@ BEGIN
 	KernelLog.String("!!! Failed to open ");
 	KernelLog.String(dname); KernelLog.String(" default device !!!"); KernelLog.Ln; 
 	RETURN
-  END;
-  
-  
+  END;  
 
    str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
    KernelLog.String("** Info for device "); KernelLog.String(str^); KernelLog.String(" **"); KernelLog.Ln; 
    
   printALCInfo(device);
   
-    
-
     context := AL.alcCreateContext(device, 0);
     
     IF (context = 0) OR  (~ AL.alcMakeContextCurrent(context) ) THEN    
@@ -236,24 +232,19 @@ BEGIN
     printALInfo();
     
    printEFXInfo(device); 
-    
-   
 
     res := AL.alcMakeContextCurrent(0);
     AL.alcDestroyContext(context);
     AL.alcCloseDevice(device);
 
-
-
-
-END Open;
+END Do;
 
 BEGIN
 
 END OpenALinfo.
 
 
-OpenALinfo.Open ~
+OpenALinfo.Do ~
 
-SystemTools.Free OpenALinfo OpenALefx OpenAL~ 
+SystemTools.FreeDownTo OpenAL~ 
 
