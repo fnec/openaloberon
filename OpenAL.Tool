@@ -16,7 +16,7 @@ TestOpenAL0.Mod
 TestOpenALWav.Mod 
 ~ 
 
-
+OpenALinfo.Do ~
 
 
 Useful links for documentation and examples:
