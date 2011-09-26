@@ -3,13 +3,14 @@ MODULE OpenAL; (** AUTHOR "fnecati"; PURPOSE "OpenAL cross platform audio librar
 IMPORT
 	SYSTEM, Kernel32, Modules, Strings, KernelLog;
 	
-CONST libname="OpenAL32.dll";
+CONST (*libname="OpenAL32.dll";*)
+		libname="wrap_oal.dll";
 
 TYPE
   String256*=ARRAY 256 OF CHAR;
   PString256*= POINTER TO ARRAY OF String256;
   
-  ADDRESS = SYSTEM.ADDRESS;
+  ADDRESS* = LONGINT;
   	
   ALbyte    * =  CHAR;  (* 1-byte signed *)
   ALshort   * =  INTEGER;  (* 2-byte signed *)

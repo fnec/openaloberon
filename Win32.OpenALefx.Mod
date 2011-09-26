@@ -782,7 +782,8 @@ BEGIN
 		alGetEffectf := SYSTEM.VAL(TalGetEffectf, AL.alGetProcAddress("alGetEffectf"));
 		alGetEffectfv := SYSTEM.VAL(TalGetEffectfv, AL.alGetProcAddress("alGetEffectfv"));
 		
-		alGenFilters := SYSTEM.VAL(TalGenFilters, AL.alGetProcAddress("alGenFilters"));
+		alGenFilters := SYSTEM.VAL(TalGenFilters, AL.alGetProcAddress("alGenFilters")); 
+		
 		alDeleteFilters := SYSTEM.VAL(TalDeleteFilters, AL.alGetProcAddress("alDeleteFilters"));
 		alIsFilter := SYSTEM.VAL(TalIsFilter, AL.alGetProcAddress("alIsFilter"));
 		alFilteri := SYSTEM.VAL(TalFilteri, AL.alGetProcAddress("alFilteri"));
