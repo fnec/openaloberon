@@ -4,28 +4,19 @@ IMPORT  AL:=OpenAL, SYSTEM, Math, Strings, Kernel, KernelLog;
 
 VAR
 	 timer: Kernel.Timer;
-	 mtimer: Kernel.MilliTimer;
-  device : AL.ALCdevice;
-  context : AL.ALCcontext;
+	device : AL.ALCdevice;
+	context : AL.ALCcontext;
 
-	 
-PROCEDURE Open1*;
+
+PROCEDURE Play1*;
 VAR
   buffer : AL.ALuint;
-
-    source : AL.ALuint;
-
- (* test : ARRAY 1000 OF CHAR;*)
+  source : AL.ALuint;
  test : POINTER TO ARRAY OF CHAR;
   z : LONGINT;
-
-
-istate: AL.ALint;
   
-BEGIN
+BEGIN {EXCLUSIVE}
   
-
-
 NEW(test, 1000);
   
   FOR z := 0 TO 999 DO
@@ -35,56 +26,45 @@ NEW(test, 1000);
 
   AL.alGenBuffers(1, SYSTEM.ADR(buffer));
   AL.alBufferData(buffer, AL.AL_FORMAT_MONO8, SYSTEM.ADR(test[0]), 1000, 11024);
-  KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+  	KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
 
   AL.alGenSources(1, SYSTEM.ADR(source));
 
   AL.alSourcef(source, AL.AL_PITCH, 1.0);
   AL.alSourcef(source, AL.AL_GAIN, 1.0);
-(*  AL.alSourcei(source, AL.AL_BUFFER, buffer); *)
   AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE); 
-  AL.alSourcei(source, AL.AL_BUFFER, buffer);
+  AL.alSourcei(source, AL.AL_BUFFER, buffer);  
+  	KernelLog.String("2- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
   
-  KernelLog.String("2- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
-  
-
   AL.alSourcePlay(source);
- 
-  KernelLog.String("3- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
-   timer.Sleep(2000);
+  	KernelLog.String("3- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+  timer.Sleep(2000);
    
 
-(*  AL.alSourceStop(source); *)
+ AL.alSourceStop(source);
  
   AL.alDeleteSources(1, SYSTEM.ADR(source));
   AL.alDeleteBuffers(1, SYSTEM.ADR(buffer));
   KernelLog.String("-------- Ok ------- "); KernelLog.Ln; 
 
-END Open1;
+END Play1;
 
-PROCEDURE Open2*;
+PROCEDURE Play2*;
 CONST  D2R = 0.0174532925;
 VAR
-  buffer : AL.ALuint;
-    source : AL.ALuint;
-  
-  data: POINTER TO ARRAY OF CHAR;
-  i : LONGINT;
+	buffer : AL.ALuint;
+	source : AL.ALuint;
+	data: POINTER TO ARRAY OF CHAR;
+	i : LONGINT;
+	x: REAL;
+	samples: LONGINT;
+	frequency: LONGINT;
+	size,  freq: AL.ALsizei;
 
-  x: REAL;
-  str: Strings.String;
-  samples: LONGINT;
-  frequency: LONGINT;
- size,  freq: AL.ALsizei;
-
- srcPos, lstPos: ARRAY [3] OF REAL;
-istate: AL.ALint;
-
-BEGIN
+	srcPos, lstPos: ARRAY [3] OF AL.ALfloat;
+	
+BEGIN {EXCLUSIVE}
  
-(*    str := AL.ALCGetString(0, AL.ALC_DEVICE_SPECIFIER);
-   KernelLog.String(" ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-*)   
   AL.alGenBuffers(1, SYSTEM.ADR(buffer));
   
   IF AL.alIsBuffer(buffer) THEN
@@ -114,8 +94,7 @@ freq := samples * frequency;
   END;    
     
   AL.alBufferData(buffer, AL.AL_FORMAT_MONO8, SYSTEM.ADR(data), samples, freq);
-  
-  KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+  	KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
 
   AL.alGenSources(1, SYSTEM.ADR(source));
   IF AL.alIsSource(source) THEN
@@ -146,54 +125,50 @@ AL.alSourcef(source, AL.AL_GAIN, 1.0);
  AL.alDeleteSources(1, SYSTEM.ADR(source));
  AL.alDeleteBuffers(1, SYSTEM.ADR(buffer));
  KernelLog.String("-------- Ok ------- "); KernelLog.Ln; 
-END Open2;
+END Play2;
 
 
 (* 16 bit data *)
-PROCEDURE Open3*;
+PROCEDURE Play3*;
 VAR
-  buffer : AL.ALuint;
+	buffer : AL.ALuint;
+	source : AL.ALuint;
 
-    source : AL.ALuint;
-
- test : POINTER TO ARRAY OF INTEGER;
-  z : LONGINT;
-
-istate: AL.ALint;
-  
-BEGIN
+	test : POINTER TO ARRAY OF INTEGER; (* for 16 bits data*)
+	z : LONGINT;
+  	sizeBytes: LONGINT;
+  	y: REAL;
+  	freq: LONGINT;
+BEGIN {EXCLUSIVE}
  
-NEW(test, 1000);
-  
-  FOR z := 0 TO 999 DO
-    test[z] := SHORT(ENTIER(30000*Math.sin(z*(2*Math.pi)/9.0)+32768));
+ NEW(test, 10000);
+ 
+ freq := 11025;
+  FOR z := 0 TO 9999 DO
+    y := Math.exp(-z/10000)*Math.sin(z*(2.0*Math.pi*freq)/10000);	
+    test[z] := SHORT(ENTIER(32760*(y-0.5)));
   END;  
-  
 
   AL.alGenBuffers(1, SYSTEM.ADR(buffer));
-  AL.alBufferData(buffer, AL.AL_FORMAT_MONO16, SYSTEM.ADR(test[0]), 1000, 11024);
-  KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+  sizeBytes := LEN(test)*SYSTEM.SIZEOF(INTEGER);
+  
+  AL.alBufferData(buffer, AL.AL_FORMAT_MONO16, SYSTEM.ADR(test[0]), sizeBytes, freq);
+  	KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
 
   AL.alGenSources(1, SYSTEM.ADR(source));
 
   AL.alSourcef(source, AL.AL_PITCH, 1.0);
   AL.alSourcef(source, AL.AL_GAIN, 1.0);
-(*  AL.alSourcei(source, AL.AL_BUFFER, buffer); *)
-  AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE); 
+(*  AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE); *)
   AL.alSourcei(source, AL.AL_BUFFER, buffer);
   
-  KernelLog.String("2- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+  	KernelLog.String("2- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
   
 
   AL.alSourcePlay(source);
  
-  KernelLog.String("3- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+	KernelLog.String("3- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
 
-(*   Kernel.SetTimer(mtimer,2000);
-
-   WHILE ~ Kernel.Expired(mtimer) DO
-	END;
-*)	
    timer.Sleep(2000);
    
  (* AL.alSourceStop(source);*)
@@ -203,35 +178,44 @@ NEW(test, 1000);
     
  KernelLog.String("-------- Ok ------- "); KernelLog.Ln; 
 
-END Open3;
+END Play3;
 
 (** *)
 PROCEDURE OpenDevice*;
 VAR
-  str: Strings.String;
-    res : AL.ALboolean;
+	str: Strings.String;
+	res : AL.ALboolean;
 BEGIN
-  device := AL.alcOpenDevice(""); (* use default *)
-   str := AL.ALCGetString(device,   AL.ALC_DEFAULT_DEVICE_SPECIFIER);
-   KernelLog.String("ALC_DEFAULT_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-
-  KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-  context := AL.alcCreateContext(device, 0);
-  KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-  res := AL.alcMakeContextCurrent(context);
-  KernelLog.String("02-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
- KernelLog.String("Device Opened" ); KernelLog.Ln; 	
+	IF device # 0 THEN 
+		KernelLog.String("Device already Open" ); KernelLog.Ln;
+		RETURN 
+	END;
+	
+	device := AL.alcOpenDevice(""); (* use default *)
+	str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
+		KernelLog.String("ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
+		KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
+	
+	context := AL.alcCreateContext(device, 0);
+		KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
+	res := AL.alcMakeContextCurrent(context);
+		KernelLog.String("02-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
+		KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+		KernelLog.String("Device Opened" ); KernelLog.Ln; 	
 END OpenDevice;
 
 (** *)
 PROCEDURE CloseDevice*;
-
+VAR res : AL.ALboolean;
 BEGIN
-	
-  AL.alcDestroyContext(context);
-  AL.alcCloseDevice(device);
-  KernelLog.String("Device Closed. "); KernelLog.Ln; 		
+	IF device = 0 THEN 
+		KernelLog.String("Device already Closed" ); KernelLog.Ln;
+		RETURN 
+	END;
+	res := AL.alcMakeContextCurrent(0);
+	AL.alcDestroyContext(context); context := 0;
+	AL.alcCloseDevice(device); device := 0;
+	KernelLog.String("Device Closed. "); KernelLog.Ln; 		
 END CloseDevice;
 
 BEGIN
@@ -240,10 +224,10 @@ END TestOpenAL0.
 
 TestOpenAL0.OpenDevice ~ TestOpenAL0.CloseDevice ~ 
 
-TestOpenAL0.Open1 ~
+TestOpenAL0.Play1 ~
 
-TestOpenAL0.Open2 ~
+TestOpenAL0.Play2 ~
 
-TestOpenAL0.Open3 ~
+TestOpenAL0.Play3 ~
 
 SystemTools.FreeDownTo OpenAL~ 
