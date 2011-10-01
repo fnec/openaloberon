@@ -1,28 +1,69 @@
 MODULE TestOpenALWav; (** AUTHOR "fnecati"; PURPOSE "test WAV file playing using OpenAL"; *)
 
-IMPORT  AL:=OpenAL, SYSTEM, KernelLog, SoundDevices, Codecs, Files, Strings,Commands;
+IMPORT  AL:=OpenAL, SYSTEM, KernelLog, SoundDevices, Codecs, Kernel, Files, Strings,Commands;
 
+CONST debug = TRUE;
 VAR
 	device : AL.ALCdevice;
 	context : AL.ALCcontext;
 	buffer : AL.ALuint;
 	source : AL.ALuint;
 	pitch, gain: AL.ALfloat;
+	
+	decoder : Codecs.AudioDecoder;
 
+	timer: Kernel.Timer;
+
+	sourcePos, listenerPos, oldListenerPos, velocity: ARRAY [3] OF AL.ALfloat;
+	directionVect: ARRAY [6] OF AL.ALfloat; (* indices 0,1,2: listener forward direction. 3,4,5: listener up vectors *)
+	
+PROCEDURE ALWriteError(CONST tit: ARRAY OF CHAR);
+VAR s: Strings.String;
+	err: AL.ALuint;
+BEGIN
+	err := AL.alGetError();
+	IF ~ debug THEN RETURN END;
+	s := AL.ALGetString(err);
+	IF s # NIL THEN
+		KernelLog.String(tit);  KernelLog.String(s^); KernelLog.Ln; 
+	END;
+END ALWriteError;
+
+PROCEDURE ALCWriteError(d: AL.ALCdevice; CONST tit: ARRAY OF CHAR);
+VAR s: Strings.String;
+	err: AL.ALuint;
+BEGIN
+	err := AL.alcGetError(d);
+	IF ~ debug THEN RETURN END;
+	s := AL.ALCGetString(d, err);
+	IF s # NIL THEN
+		KernelLog.String(tit); KernelLog.String(s^); KernelLog.Ln; 
+	END;
+END ALCWriteError;
+	
+(** to be continued ... *)
+PROCEDURE Play3D*;
+VAR
+	secondsElapsed,	totalTime, timeSincePlay: AL.ALfloat;
+
+BEGIN
+
+	directionVect := [ 0.0, 0.0, -1.0,   0.0, 1.0, 0.0]; (* listPos, listUP *)
+	secondsElapsed := 0.000005;  (* needed to work out a doppler effect *)
+	totalTime := 0.0;
+	timeSincePlay := 0.0;
+	AL.alListenerfv(AL.AL_POSITION, SYSTEM.ADR(listenerPos[0]));
+	AL.alListenerfv(AL.AL_ORIENTATION, SYSTEM.ADR(directionVect[0]));
+END Play3D;
 			
 PROCEDURE LoadWav*(cmd: Commands.Context);
 VAR
 	fmt: AL.ALuint; 
-	srcPos, lstPos: ARRAY [3] OF AL.ALfloat;
-
 	dres: LONGINT;
 	
 	file: Files.File;
 	in: Files.Reader;
- 	 
-	decoder : Codecs.AudioDecoder;
-	sbuffer : SoundDevices.Buffer;
-	
+	sbuffer  : SoundDevices.Buffer;	
 	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : LONGINT;
 	fname: ARRAY 256 OF CHAR;
 		
@@ -31,9 +72,7 @@ BEGIN
 		KernelLog.String("invalid filename"); KernelLog.Ln; 
 		RETURN;
 	END;
-	KernelLog.String("arg fname= "); KernelLog.String(fname); KernelLog.Ln; 
-	(* load sound file *)
-	decoder := Codecs.GetAudioDecoder("WAV");
+
 	IF decoder = NIL THEN
 		KernelLog.String( "WAV decoder not installed"); KernelLog.Ln; 
 		RETURN
@@ -50,17 +89,14 @@ BEGIN
 		KernelLog.String( "WAV decoder Open Error. "); KernelLog.Ln; 
 		RETURN 
 	END;
-	
+
+	KernelLog.String(fname); KernelLog.String(" loaded.");KernelLog.Ln; 
+		
 	decoder.GetAudioInfo(nofChannels, samplePerSecond, bitsPerSample);
 	samples := decoder.GetTotalSamples();
 
-	KernelLog.String("nofChannels= "); KernelLog.Int(nofChannels, 0); KernelLog.Ln; 
-	KernelLog.String("samplePerSecond = "); KernelLog.Int(samplePerSecond, 0); KernelLog.Ln; 
-	KernelLog.String("bitsPerSample= "); KernelLog.Int(bitsPerSample, 0); KernelLog.Ln; 
-	KernelLog.String("samples= "); KernelLog.Int(samples, 0); KernelLog.Ln; 
-
 	(* data size in bytes *)
-	sizeBytes := samples*(bitsPerSample DIV 8);
+	sizeBytes := nofChannels*samples*(bitsPerSample DIV 8);
 	
 	NEW(sbuffer);
 	sbuffer.len := sizeBytes;
@@ -85,40 +121,54 @@ BEGIN
 		fmt := AL.AL_FORMAT_MONO8
 	END;
 	
-	KernelLog.String("fmt= "); KernelLog.Hex(fmt, 8); KernelLog.Ln; 
-	
-	
+	IF debug THEN
+		KernelLog.String("nofChannels= "); KernelLog.Int(nofChannels, 0); KernelLog.Ln; 
+		KernelLog.String("samplePerSecond = "); KernelLog.Int(samplePerSecond, 0); KernelLog.Ln; 
+		KernelLog.String("bitsPerSample= "); KernelLog.Int(bitsPerSample, 0); KernelLog.Ln; 
+		KernelLog.String("samples= "); KernelLog.Int(samples, 0); KernelLog.Ln; 
+		KernelLog.String("fmt= "); KernelLog.Hex(fmt, 8); KernelLog.Ln;
+	END;	
+		
   (* Clear the source and buffers if they are not empty *)
 	 IF source # 0 THEN AL.alDeleteSources(1, SYSTEM.ADR(source)); source := 0; END;
 	 IF buffer # 0 THEN AL.alDeleteBuffers(1, SYSTEM.ADR(buffer)); buffer := 0; END;
 		
-	AL.alGenBuffers(1, SYSTEM.ADR(buffer));      
-	KernelLog.String("00- loadwav alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
-	
-	AL.alBufferData(buffer, fmt, SYSTEM.ADR(sbuffer.data), sizeBytes, samplePerSecond); 
-	KernelLog.String("0- loadwav alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+	AL.alGenBuffers(1, SYSTEM.ADR(buffer)); 
+	ALWriteError("0- loadwav: ");
+		
+		AL.alBufferData(buffer, fmt, SYSTEM.ADR(sbuffer.data[0]), sizeBytes, samplePerSecond); 
+	ALWriteError("1- loadwav: ");
 	
 	 AL.alGenSources(1, SYSTEM.ADR(source));
 	 	
-	pitch := 1.0;
-	gain := 1.0;
 	 AL.alSourcef(source, AL.AL_PITCH, pitch);
 	AL.alSourcef(source, AL.AL_GAIN, gain); 
-	srcPos := [0.0, 0.0, 0.0];
-	AL.alSourcefv(source, AL.AL_POSITION, SYSTEM.ADR(srcPos[0]));
-	AL.alSourcei(source, AL.AL_LOOPING, AL.AL_FALSE);
+	sourcePos := [0.0, 0.0, 0.0];
+	AL.alSourcefv(source, AL.AL_POSITION, SYSTEM.ADR(sourcePos[0]));
+	AL.alSourcei(source, AL.AL_LOOPING, AL.AL_FALSE); 
 	 AL.alSourcei(source, AL.AL_BUFFER, buffer);
  
-	lstPos := [0.0, 0.0, 0.0];
-	AL.alListenerfv(AL.AL_POSITION, SYSTEM.ADR(lstPos[0]));
-	KernelLog.String("x- loadwav alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+	listenerPos := [0.0, 0.0, 0.0];
+	AL.alListenerfv(AL.AL_POSITION, SYSTEM.ADR(listenerPos[0]));
+	ALWriteError("2-loadwav: ");
 END LoadWav;
 
 (** *)
 PROCEDURE Play*;
+VAR istate: LONGINT;
 BEGIN
+
 	AL.alSourcePlay(source);
-		KernelLog.String("Playing alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+	
+	ALWriteError("Playing Error : "); 
+
+(*	AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);
+	WHILE istate = AL.AL_PLAYING DO	
+		timer.Sleep(100);
+		KernelLog.String("x"); 	
+		AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);
+	END;
+	KernelLog.Ln; 	*)
 END Play;
 
 PROCEDURE IncGain*;
@@ -138,7 +188,7 @@ END DecGain;
 PROCEDURE IncPitch*;
 BEGIN
 	pitch := pitch + 0.1;
-	IF pitch > 1.0 THEN pitch := 1.0; END;
+	IF pitch > 2.0 THEN pitch := 2.0; END;
 	AL.alSourcef(source, AL.AL_PITCH, pitch);
 END IncPitch;
 
@@ -160,16 +210,23 @@ BEGIN
 		RETURN 
 	END;
 	device := AL.alcOpenDevice(""); (* use default *)
+	ALCWriteError(device, "Device Open Error: ");	
+	
+	IF device = 0 THEN RETURN END;
+	
 	str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
+		ALCWriteError(device, "Device Specifier Error: ");	
 		KernelLog.String("ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-		KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
 		
 	context := AL.alcCreateContext(device, 0);
-		KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
+			ALCWriteError(device, "Device alcCreateContext Error: ");	
 
 	res := AL.alcMakeContextCurrent(context);  
-		KernelLog.String("02-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-		KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
+			ALCWriteError(device, "Device alcMakeContextCurrent Error: ");
+			ALWriteError("x-OpenDevice: ");
+		
+	(* load sound decoder *)
+		decoder := Codecs.GetAudioDecoder("WAV");
 		KernelLog.String("Device Opened" ); KernelLog.Ln; 	
 END OpenDevice;
 
@@ -194,7 +251,8 @@ BEGIN
 END CloseDevice;
 
 BEGIN
-
+	NEW(timer);
+	gain := 1.0; pitch := 1.0;
 END TestOpenALWav.
 
 TestOpenALWav.OpenDevice ~      TestOpenALWav.CloseDevice ~ 
@@ -207,10 +265,13 @@ TestOpenALWav.LoadWav "s11kulaw.wav" ~
  TestOpenALWav.LoadWav "s8k16bitpcm.wav" ~
 TestOpenALWav.LoadWav "s8k8bitpcm.wav" ~
 TestOpenALWav.LoadWav "s8kulaw.wav" ~
+TestOpenALWav.LoadWav "Wave4.WAV" ~
 
+TestOpenALWav.LoadWav "desktoplogin.wav" ~
 
 TestOpenALWav.Play ~  
 
+TestOpenALWav.TestBuffer ~
 
 TestOpenALWav.DecGain ~  TestOpenALWav.IncGain~  
 
@@ -220,3 +281,4 @@ TestOpenALWav.DecPitch ~  TestOpenALWav.IncPitch~
 SystemTools.FreeDownTo  OpenAL~ 
 
 OpenALinfo.Do~ 
+

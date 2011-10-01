@@ -214,13 +214,13 @@ CONST
   AL_BITS                                 * =  2002H;
   AL_CHANNELS                             * =  2003H;
   AL_SIZE                                 * =  2004H;
-
+ (* AL_DATA                                 * =  2005H;*)
 (**
  * Buffer state.
  *
  * Not supported for public use (yet).
  *)  
-(*  AL_DATA                                 * =  2005H; *)
+
   AL_UNUSED                               * =  2010H;
   AL_PENDING                              * =  2011H;
   AL_PROCESSED                            * =  2012H;
