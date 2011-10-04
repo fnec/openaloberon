@@ -578,7 +578,7 @@ alDopplerVelocity-: PROCEDURE { WINAPI } (value : ALfloat);
 
 (* Device Management *)
 alcOpenDevice-: PROCEDURE { WINAPI } (CONST deviceName : ARRAY OF CHAR) : ALCdevice;
-alcCloseDevice-: PROCEDURE { WINAPI } (device : ALCdevice);
+alcCloseDevice-: PROCEDURE { WINAPI } (device : ALCdevice): ALCboolean;
 (* Context Management *)
 alcCreateContext-: PROCEDURE { WINAPI } (device : ALCdevice; attrList : PALCint) : ALCcontext;
 alcMakeContextCurrent-: PROCEDURE { WINAPI } ( context : ALCcontext) : ALCboolean;
@@ -795,14 +795,14 @@ END GetStringFromAddr;
 
 PROCEDURE ALGetString*(name: ALCenum): Strings.String;
 VAR  sadr: LONGINT;
-BEGIN  {EXCLUSIVE}
+BEGIN 
 	sadr := alGetString(name);
 	RETURN GetStringFromAddr(sadr);	
 END ALGetString;
 
 PROCEDURE ALCGetString*(device: ALCdevice; name: ALCenum): Strings.String;
 VAR  sadr: LONGINT;
-BEGIN {EXCLUSIVE}
+BEGIN 
 	sadr := alcGetString(device, name);
 	RETURN GetStringFromAddr(sadr);	
 END ALCGetString;
@@ -846,7 +846,7 @@ VAR  sadr, sadr0: LONGINT;
 	slen, index: LONGINT;
 	str: Strings.String;
 	dynstr: PString256;
-BEGIN {EXCLUSIVE}
+BEGIN
 
 		(* count the number of devices in the list *)
 		sadr0 := alcGetString(device, name);
