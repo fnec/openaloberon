@@ -214,9 +214,20 @@ BEGIN
 	END;
 	res := AL.alcMakeContextCurrent(0);
 	AL.alcDestroyContext(context); context := 0;
-	AL.alcCloseDevice(device); device := 0;
+	res := AL.alcCloseDevice(device); device := 0;
 	KernelLog.String("Device Closed. "); KernelLog.Ln; 		
 END CloseDevice;
+
+(** for commandline run*)
+PROCEDURE Do*;
+VAR
+BEGIN
+	OpenDevice;
+	Play1;
+	Play2;
+	Play3;
+	CloseDevice;
+END Do;
 
 BEGIN
  NEW(timer);

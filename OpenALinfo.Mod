@@ -1,7 +1,10 @@
 MODULE OpenALinfo; (** AUTHOR "fnecati"; PURPOSE "show OpenAL device infos"; *)
 
-IMPORT  AL:=OpenAL, EFX:=OpenALefx, SYSTEM, Strings,  KernelLog;
-
+IMPORT  AL:=OpenAL, EFX:=OpenALefx, SYSTEM, Files, Strings,  KernelLog;
+CONST
+	openalPlayFile ="openalplay.ini"; (* configuration file for available list of play devices *) 
+	openalCapFile ="openalcap.ini"    (* configuration file for available list of capture devices *) 
+	
 TYPE PString256 = AL.PString256;
 
 VAR 
@@ -171,7 +174,12 @@ VAR
   i : LONGINT;
   dname: ARRAY 64 OF CHAR;	
   dynstr: PString256;
+  file: Files.File;
+  fwr: Files.Writer;
 BEGIN
+ 
+ file := Files.New(openalPlayFile);
+ Files.OpenWriter(fwr, file, 0);
  
  KernelLog.String("*****************************************"); KernelLog.Ln; 
  KernelLog.String("Available playback devices: "); KernelLog.Ln; 
@@ -180,27 +188,37 @@ BEGIN
   	dynstr :=AL.ALCGetDeviceList(0, AL.ALC_ALL_DEVICES_SPECIFIER);
   	   FOR i:=0 TO LEN(dynstr)-1 DO   
 		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
+		   fwr.String("#"); fwr.String(dynstr[i]); fwr.Ln;
 	  END;
   ELSE
   	dynstr := AL.ALCGetDeviceList(0, AL.ALC_DEVICE_SPECIFIER);
   	   FOR i:=0 TO LEN(dynstr)-1 DO   
 		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
+		    fwr.String("#"); fwr.String(dynstr[i]); fwr.Ln;
 	  END;
   END;
+  fwr.Update;
+  Files.Register(file);
+  
  KernelLog.String("*****************************************"); KernelLog.Ln;         
-(* COPY(dynstr^[0], dname);*)
- 	    
+
+ file := Files.New(openalCapFile);
+ Files.OpenWriter(fwr, file, 0);
+  	    
   KernelLog.String("Available capture devices: "); KernelLog.Ln; 
   dynstr := AL.ALCGetDeviceList(0, AL.ALC_CAPTURE_DEVICE_SPECIFIER);
   	   FOR i:=0 TO LEN(dynstr)-1 DO   
 		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
+		   fwr.String("#"); fwr.String(dynstr[i]); fwr.Ln;
 	  END;
+  fwr.Update;
+  Files.Register(file);
+	  
  KernelLog.String("*****************************************"); KernelLog.Ln;
     
  KernelLog.String("Default playback device: ");
  str := AL.ALCGetString(0, AL.ALC_DEFAULT_DEVICE_SPECIFIER);
  KernelLog.String(str^); KernelLog.Ln;
- (*COPY(str^, dname);*)
   
  KernelLog.String("Default capture device: ");
  str := AL.ALCGetString(0, AL.ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
@@ -224,7 +242,7 @@ BEGIN
     
     IF (context = 0) OR  (~ AL.alcMakeContextCurrent(context) ) THEN    
 	        IF context # 0 THEN   AL.alcDestroyContext(context); END;
-        AL.alcCloseDevice(device);
+        res := AL.alcCloseDevice(device);
         KernelLog.String("!!! Failed to set a context !!!"); KernelLog.Ln; KernelLog.Ln; 
         RETURN;
    END;
@@ -235,7 +253,7 @@ BEGIN
 
     res := AL.alcMakeContextCurrent(0);
     AL.alcDestroyContext(context);
-    AL.alcCloseDevice(device);
+    res := AL.alcCloseDevice(device);
 
 END Do;
 

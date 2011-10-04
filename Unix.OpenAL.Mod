@@ -580,7 +580,7 @@ alDopplerVelocity-: PROCEDURE { C } (value : ALfloat);
 
 (* Device Management *)
 alcOpenDevice-: PROCEDURE { C } (CONST deviceName : ARRAY OF CHAR) : ALCdevice;
-alcCloseDevice-: PROCEDURE { C } (device : ALCdevice);
+alcCloseDevice-: PROCEDURE { C } (device : ALCdevice): ALCboolean;
 (* Context Management *)
 alcCreateContext-: PROCEDURE { C } (device : ALCdevice; attrList : PALCint) : ALCcontext;
 alcMakeContextCurrent-: PROCEDURE { C } ( context : ALCcontext) : ALCboolean;

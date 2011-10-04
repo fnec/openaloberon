@@ -1,26 +1,25 @@
-MODULE TestOpenALWav; (** AUTHOR "fnecati"; PURPOSE "test WAV file playing using OpenAL"; *)
-(* uses Audio codecs modules  in Aos *)
-IMPORT  AL:=OpenAL, SYSTEM, KernelLog, SoundDevices, Codecs, Kernel, Files, Streams, Strings,Commands, Modules;
+MODULE TestOpenALWav2; (** AUTHOR "fnecati"; PURPOSE "test WAV file playing using OpenAL"; *)
+(* uses stripped version of WAVcodec *)
+
+IMPORT  AL:=OpenAL, SYSTEM, Streams, KernelLog, WAV:=OpenALWAVCodec, Kernel, Files, Strings, Commands, Modules;
 
 CONST 
 	debug = TRUE;
-	
 	playConfilename="openalplay.ini";
-	    
+		
 VAR
-	device : AL.ALCdevice;
+	device: AL.ALCdevice;
 	context : AL.ALCcontext;
 	buffer : AL.ALuint;
 	source : AL.ALuint;
 	pitch, gain: AL.ALfloat;
 	
-	decoder : Codecs.AudioDecoder;
+	decoder : WAV.WAVDecoder;
 
 	timer: Kernel.Timer;
 
 	sourcePos, listenerPos, oldListenerPos, velocity: ARRAY [3] OF AL.ALfloat;
 	directionVect: ARRAY [6] OF AL.ALfloat; (* indices 0,1,2: listener forward direction. 3,4,5: listener up vectors *)
-
 
 (** get device name from file *)
 PROCEDURE LoadDeviceName*(CONST fname: ARRAY OF CHAR; VAR sdev: ARRAY OF CHAR);
@@ -28,7 +27,6 @@ VAR file: Files.File;
 	rd: Files.Reader;
 	found: BOOLEAN;
 BEGIN
-
 	sdev := ""; (* default device*)
 	file := Files.Old(fname);
 	IF file = NIL THEN RETURN ; END;
@@ -42,8 +40,7 @@ BEGIN
 		rd.SkipWhitespace();
 	END;	
 END LoadDeviceName;
-
-		
+	
 PROCEDURE ALWriteError(CONST tit: ARRAY OF CHAR);
 VAR s: Strings.String;
 	err: AL.ALuint;
@@ -83,14 +80,14 @@ BEGIN
 	AL.alListenerfv(AL.AL_ORIENTATION, SYSTEM.ADR(directionVect[0]));
 END Play3D;
 			
-PROCEDURE LoadWav*(fname: ARRAY OF CHAR);
+PROCEDURE LoadWav*(fname: ARRAY OF CHAR); 
 VAR
 	fmt: AL.ALuint; 
 	dres: LONGINT;
 	
 	file: Files.File;
 	in: Files.Reader;
-	sbuffer  : SoundDevices.Buffer;	
+	sbuffer  : WAV.Buffer;	
 	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : LONGINT;
 		
 BEGIN 
@@ -102,7 +99,7 @@ BEGIN
 	
 	Files.OpenReader( in, file, 0);
 	decoder.Open(in, dres);
-	IF dres # Codecs.ResOk THEN 
+	IF dres # WAV.ResOk THEN 
 		KernelLog.String( "WAV decoder Open Error. "); KernelLog.Ln; 
 		RETURN 
 	END;
@@ -184,15 +181,9 @@ BEGIN
 		timer.Sleep(100);		
 		AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);	
 	UNTIL istate # AL.AL_PLAYING ;	
-	
-(*	AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);
-	WHILE istate = AL.AL_PLAYING DO	
-		timer.Sleep(100);
-		KernelLog.String("x"); 	
-		AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);
-	END;
-*)	
+
 	KernelLog.Ln; 
+	
 END Play;
 
 PROCEDURE IncGain*;
@@ -229,23 +220,19 @@ VAR
 	str: Strings.String;
 	res : AL.ALboolean;
 	s: ARRAY 128 OF CHAR;
-BEGIN
-	IF device # 0 THEN 
-		KernelLog.String("Device already Open" ); KernelLog.Ln;
-	END;
-	
+BEGIN 
 	 LoadDeviceName(playConfilename, s);
-		KernelLog.String("Device from configuration file: ");  KernelLog.String(s); KernelLog.Ln; 
-
-	device := AL.alcOpenDevice(s); (* use from configuration *)
-		ALCWriteError(device, "Device Open Error: ");	
-	KernelLog.String("opened dev= "); KernelLog.Int(device, 0); KernelLog.Ln; 
-
+	 KernelLog.String("Device from configuration file: ");  KernelLog.String(s); KernelLog.Ln; 
+	 
+	device := AL.alcOpenDevice(s);
+	ALCWriteError(device, "Device Open Error: ");	
+	KernelLog.String("opened dev= "); KernelLog.Int(device, 0); KernelLog.Ln;
+	
 	IF device = 0 THEN RETURN END;
 	
 	str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
 		ALCWriteError(device, "Device Specifier Error: ");	
-		KernelLog.String("ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
+		KernelLog.String("ALC_DEVICE_SPECIFIER: "); KernelLog.String(str^); KernelLog.Ln; 
 		
 	context := AL.alcCreateContext(device, 0);
 			ALCWriteError(device, "Device alcCreateContext Error: ");	
@@ -255,7 +242,8 @@ BEGIN
 			ALWriteError("x-OpenDevice: ");
 		
 	(* load sound decoder *)
-		decoder := Codecs.GetAudioDecoder("WAV");
+		NEW(decoder);
+				
 		KernelLog.String("Device Opened" ); KernelLog.Ln; 	
 END OpenDevice;
 
@@ -263,22 +251,24 @@ END OpenDevice;
 PROCEDURE CloseDevice*;
 VAR
  	res : AL.ALboolean;
-BEGIN
-	IF device = 0 THEN 
+BEGIN 
+(*	IF device = 0 THEN 
 		KernelLog.String("Device already Closed" ); KernelLog.Ln;
 		RETURN 
 	END;
+*)	
   (* Clear the source and buffers if they are not empty *)  	
 	 IF source # 0 THEN AL.alDeleteSources(1, SYSTEM.ADR(source)); source := 0;  END;
 	 IF buffer # 0 THEN AL.alDeleteBuffers(1, SYSTEM.ADR(buffer)); buffer := 0;  END;
 	 
 	res := AL.alcMakeContextCurrent(0);
-	AL.alcDestroyContext(context); context := 0;
-	res := AL.alcCloseDevice(device); device := 0;
-	KernelLog.String("closed dev= "); KernelLog.Int(device, 0); KernelLog.Ln; 
+	AL.alcDestroyContext(context);  
+	res := AL.alcCloseDevice(device); 
+
+	KernelLog.String("closed dev= "); KernelLog.Int(device, 0); KernelLog.Ln;
 	KernelLog.String("close res: ");  KernelLog.Boolean(res); KernelLog.Ln; 
-	
-  KernelLog.String("DeviceClosed. "); KernelLog.Ln; 		
+		
+  KernelLog.String("Device Closed. "); KernelLog.Ln; 		
 END CloseDevice;
 
 (** from A2 command,  *)
@@ -321,32 +311,32 @@ END OnClose;
 BEGIN
 	NEW(timer);
 	gain := 1.0; pitch := 1.0;
-	Modules.InstallTermHandler(OnClose) ;
-END TestOpenALWav.
+	Modules.InstallTermHandler(OnClose) ;	
+END TestOpenALWav2.
 
-TestOpenALWav.OpenDevice ~      TestOpenALWav.CloseDevice ~ 
+TestOpenALWav2.OpenDevice ~      TestOpenALWav2.CloseDevice ~ 
 
-TestOpenALWav.Open "test.wav" ~
-TestOpenALWav.Open "rugby.wav" ~
-TestOpenALWav.Open "s11k16bitpcm.wav" ~
-TestOpenALWav.Open "s11k8bitpcm.wav" ~
-TestOpenALWav.Open "s11kulaw.wav" ~
- TestOpenALWav.Open "s8k16bitpcm.wav" ~
-TestOpenALWav.Open "s8k8bitpcm.wav" ~
-TestOpenALWav.Open "s8kulaw.wav" ~
-TestOpenALWav.Open "Wave4.WAV" ~
+TestOpenALWav2.Open "test.wav" ~
+TestOpenALWav2.Open "rugby.wav" ~
+TestOpenALWav2.Open "s11k16bitpcm.wav" ~
+TestOpenALWav2.Open "s11k8bitpcm.wav" ~
+TestOpenALWav2.Open "s11kulaw.wav" ~
+ TestOpenALWav2.Open "s8k16bitpcm.wav" ~
+TestOpenALWav2.Open "s8k8bitpcm.wav" ~
+TestOpenALWav2.Open "s8kulaw.wav" ~
+TestOpenALWav2.Open "Wave4.WAV" ~
 
-TestOpenALWav.Open "desktoplogin.wav" ~
+TestOpenALWav2.Open "desktoplogin.wav" ~
 
-TestOpenALWav.Play ~  
+TestOpenALWav2.Play ~  
 
-TestOpenALWav.DecGain ~  TestOpenALWav.IncGain~  
+TestOpenALWav2.DecGain ~  TestOpenALWav2.IncGain~  
 
-TestOpenALWav.DecPitch ~  TestOpenALWav.IncPitch~  
+TestOpenALWav2.DecPitch ~  TestOpenALWav2.IncPitch~  
 
-TestOpenALWav.Do ~ 
+TestOpenALWav2.Do ~ 
 
 SystemTools.FreeDownTo  OpenAL~ 
 
-OpenALinfo.Do~ 
 
+OpenALinfo.Do~ 
