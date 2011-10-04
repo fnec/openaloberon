@@ -32,7 +32,7 @@ This command lists the playback and capture devices available in your computer a
 
 If you particularly want to choose one of playback device name in the list, open "openalplay.ini" file with any editor,  
 and remove "#" character which is in front of the device name that you would like choose, finally save the file. 
-If "#" is available in front of  all device names and if these files are available, then, openaloberon will use the default device.
+If "#" is available in front of  all device names or if these files are not available, then, openaloberon will use the default device.
 
  
 
