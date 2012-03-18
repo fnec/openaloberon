@@ -3,7 +3,9 @@ MODULE OpenAL; (** AUTHOR "fnecati"; PURPOSE "OpenAL cross platform audio librar
 IMPORT
 	SYSTEM, Kernel32, Modules, Strings, KernelLog;
 	
-CONST (*libname="OpenAL32.dll";*)
+CONST 
+		(* dowload these dlls from openal.org *)
+		(*libname="OpenAL32.dll";*)
 		libname="wrap_oal.dll";
 
 TYPE

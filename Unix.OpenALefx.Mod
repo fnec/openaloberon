@@ -2,7 +2,6 @@ MODULE OpenALefx; (** AUTHOR "fnecati"; PURPOSE "OpenAL effects library "; *)
 IMPORT SYSTEM,  AL:=OpenAL;
 
 TYPE 
-
 	ALint = AL.ALint;
 	ALuint = AL.ALuint;
 	ALsizei = AL.ALsizei;

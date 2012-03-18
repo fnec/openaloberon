@@ -9,13 +9,14 @@ Compiler.Compile Win32.OpenAL.Mod Win32.OpenALefx.Mod Win32.OpenALext.Mod~
 
 Examples:
 
-Compiler.Compile 
-
+Compiler.Compile
 OpenALWAVCodec.Mod
 OpenALinfo.Mod
+OpenALUtil.Mod
 TestOpenAL0.Mod
 TestOpenALWav.Mod 
 TestOpenALWav2.Mod
+TestOpenALWav3.Mod
 ~ 
 
 

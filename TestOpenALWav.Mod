@@ -21,6 +21,13 @@ VAR
 	sourcePos, listenerPos, oldListenerPos, velocity: ARRAY [3] OF AL.ALfloat;
 	directionVect: ARRAY [6] OF AL.ALfloat; (* indices 0,1,2: listener forward direction. 3,4,5: listener up vectors *)
 
+PROCEDURE Delay(ms: LONGINT);
+VAR t0: LONGINT;
+BEGIN
+	t0 := Kernel.GetTicks() ;
+	WHILE ms + t0 < Kernel.GetTicks() DO END;
+END Delay;
+
 
 (** get device name from file *)
 PROCEDURE LoadDeviceName*(CONST fname: ARRAY OF CHAR; VAR sdev: ARRAY OF CHAR);
@@ -181,7 +188,7 @@ BEGIN
 
 	REPEAT
 		KernelLog.String("x"); 
-		timer.Sleep(100);		
+		 timer.Sleep(100);
 		AL.alGetSourcei(source, AL.AL_SOURCE_STATE, istate);	
 	UNTIL istate # AL.AL_PLAYING ;	
 	
@@ -319,14 +326,14 @@ BEGIN
 END OnClose;
 
 BEGIN
-	NEW(timer);
+	 NEW(timer);
 	gain := 1.0; pitch := 1.0;
 	Modules.InstallTermHandler(OnClose) ;
 END TestOpenALWav.
 
 TestOpenALWav.OpenDevice ~      TestOpenALWav.CloseDevice ~ 
 
-TestOpenALWav.Open "test.wav" ~
+TestOpenALWav.Open "openaloberon/test.wav" ~
 TestOpenALWav.Open "rugby.wav" ~
 TestOpenALWav.Open "s11k16bitpcm.wav" ~
 TestOpenALWav.Open "s11k8bitpcm.wav" ~

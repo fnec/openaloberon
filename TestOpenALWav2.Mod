@@ -1,5 +1,4 @@
 MODULE TestOpenALWav2; (** AUTHOR "fnecati"; PURPOSE "test WAV file playing using OpenAL"; *)
-(* uses stripped version of WAVcodec *)
 
 IMPORT  AL:=OpenAL, SYSTEM, Streams, KernelLog, WAV:=OpenALWAVCodec, Kernel, Files, Strings, Commands, Modules;
 

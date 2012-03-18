@@ -3,7 +3,8 @@ MODULE OpenAL; (** AUTHOR "fnecati"; PURPOSE "OpenAL cross platform audio librar
 IMPORT
 	SYSTEM, Unix, Modules, Strings, KernelLog;
 	
-CONST libname="libopenal.so";
+CONST 
+	libname="libopenal.so";
 
 TYPE
   String256*=ARRAY 256 OF CHAR;
