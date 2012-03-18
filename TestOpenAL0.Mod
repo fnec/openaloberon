@@ -1,6 +1,6 @@
 MODULE TestOpenAL0; (** AUTHOR ""; PURPOSE ""; *)
 
-IMPORT  AL:=OpenAL, SYSTEM, Math, Strings, Kernel, KernelLog;
+IMPORT  AL:=OpenAL, ALU := OpenALUtil, SYSTEM, Math, Strings, Kernel, KernelLog;
 
 VAR
 	 timer: Kernel.Timer;
@@ -15,7 +15,7 @@ VAR
  test : POINTER TO ARRAY OF CHAR;
   z : LONGINT;
   
-BEGIN {EXCLUSIVE}
+BEGIN 
   
 NEW(test, 1000);
   
@@ -63,7 +63,7 @@ VAR
 
 	srcPos, lstPos: ARRAY [3] OF AL.ALfloat;
 	
-BEGIN {EXCLUSIVE}
+BEGIN 
  
   AL.alGenBuffers(1, SYSTEM.ADR(buffer));
   
@@ -139,7 +139,7 @@ VAR
   	sizeBytes: LONGINT;
   	y: REAL;
   	freq: LONGINT;
-BEGIN {EXCLUSIVE}
+BEGIN 
  
  NEW(test, 10000);
  
@@ -180,60 +180,19 @@ BEGIN {EXCLUSIVE}
 
 END Play3;
 
-(** *)
-PROCEDURE OpenDevice*;
-VAR
-	str: Strings.String;
-	res : AL.ALboolean;
-BEGIN
-	IF device # 0 THEN 
-		KernelLog.String("Device already Open" ); KernelLog.Ln;
-		RETURN 
-	END;
-	
-	device := AL.alcOpenDevice(""); (* use default *)
-	str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
-		KernelLog.String("ALC_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
-		KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-	
-	context := AL.alcCreateContext(device, 0);
-		KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-	res := AL.alcMakeContextCurrent(context);
-		KernelLog.String("02-- alcGetError= "); KernelLog.Hex(AL.alcGetError(device), 4); KernelLog.Ln; 
-		KernelLog.String("03-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 
-		KernelLog.String("Device Opened" ); KernelLog.Ln; 	
-END OpenDevice;
-
-(** *)
-PROCEDURE CloseDevice*;
-VAR res : AL.ALboolean;
-BEGIN
-	IF device = 0 THEN 
-		KernelLog.String("Device already Closed" ); KernelLog.Ln;
-		RETURN 
-	END;
-	res := AL.alcMakeContextCurrent(0);
-	AL.alcDestroyContext(context); context := 0;
-	res := AL.alcCloseDevice(device); device := 0;
-	KernelLog.String("Device Closed. "); KernelLog.Ln; 		
-END CloseDevice;
-
-(** for commandline run*)
+(* for commandline run*)
 PROCEDURE Do*;
-VAR
 BEGIN
-	OpenDevice;
+
 	Play1;
 	Play2;
 	Play3;
-	CloseDevice;
+
 END Do;
 
 BEGIN
  NEW(timer);
 END TestOpenAL0.
-
-TestOpenAL0.OpenDevice ~ TestOpenAL0.CloseDevice ~ 
 
 TestOpenAL0.Play1 ~
 
@@ -241,4 +200,6 @@ TestOpenAL0.Play2 ~
 
 TestOpenAL0.Play3 ~
 
-SystemTools.FreeDownTo OpenAL~ 
+TestOpenAL0.Do ~
+
+SystemTools.Free TestOpenAL0~ 

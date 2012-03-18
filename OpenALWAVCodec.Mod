@@ -1,6 +1,6 @@
 MODULE OpenALWAVCodec; (** AUTHOR "MVT, PL"; PURPOSE "WAV audio format Codec"; *)
 
-(* unified and stripped version of WAVCodec.Mod, Codecs.Mod, SoundDevices *)
+(* unified and stripped version of WAVCodec.Mod, Codes.Mod, SoundDevices, fnecati *)
 
 IMPORT
 	Streams, KernelLog, SYSTEM;
