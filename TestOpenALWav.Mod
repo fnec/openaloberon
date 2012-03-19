@@ -333,7 +333,7 @@ END TestOpenALWav.
 
 TestOpenALWav.OpenDevice ~      TestOpenALWav.CloseDevice ~ 
 
-TestOpenALWav.Open "openaloberon/test.wav" ~
+TestOpenALWav.Open "test.wav" ~
 TestOpenALWav.Open "rugby.wav" ~
 TestOpenALWav.Open "s11k16bitpcm.wav" ~
 TestOpenALWav.Open "s11k8bitpcm.wav" ~
