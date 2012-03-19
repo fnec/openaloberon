@@ -429,8 +429,19 @@ alIsExtensionPresent-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR) : ALboolean
 alGetProcAddress-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR): ADDRESS;
 alGetEnumValue-: PROCEDURE { C } (VAR ename : ALubyte) : ALenum;
 
-(* Set Listener parameters *)
+ (*  LISTENER
+  Listener represents the location and orientation of the
+  'user' in 3D-space.
+ 
+  Properties include: -
+ 
+  Gain         AL_GAIN         ALfloat
+  Position     AL_POSITION     ALfloat[3]
+  Velocity     AL_VELOCITY     ALfloat[3]
+  Orientation  AL_ORIENTATION  ALfloat[6] (Forward then Up vectors)
+*) 
 
+(* Set Listener parameters *)
 alListenerf-: PROCEDURE { C } (param : ALenum; value : ALfloat);
 alListener3f-: PROCEDURE { C } (param : ALenum; v1, v2, v3 : ALfloat);
 alListenerfv-: PROCEDURE { C } (param : ALenum;  values : PALfloat);
@@ -446,37 +457,37 @@ alGetListeneri-: PROCEDURE { C } (param : ALenum; VAR value : ALint);
 alGetListener3i-: PROCEDURE { C } (param : ALenum; VAR v1, v2, v3:  ALint);
 alGetListeneriv-: PROCEDURE { C } (param : ALenum; values : PALint);
 
-(**
- * SOURCE
- * Sources represent individual sound objects in 3D-space.
- * Sources take the PCM data provided in the specified Buffer,
- * apply Source-specific modifications, and then
- * submit them to be mixed according to spatial arrangement etc.
- * 
- * Properties include: -
- *
- * Gain                              AL_GAIN                 ALfloat
- * Min Gain                          AL_MIN_GAIN             ALfloat
- * Max Gain                          AL_MAX_GAIN             ALfloat
- * Position                          AL_POSITION             ALfloat[3]
- * Velocity                          AL_VELOCITY             ALfloat[3]
- * Direction                         AL_DIRECTION            ALfloat[3]
- * Head Relative Mode                AL_SOURCE_RELATIVE      ALint (AL_TRUE or AL_FALSE)
- * Reference Distance                AL_REFERENCE_DISTANCE   ALfloat
- * Max Distance                      AL_MAX_DISTANCE         ALfloat
- * RollOff Factor                    AL_ROLLOFF_FACTOR       ALfloat
- * Inner Angle                       AL_CONE_INNER_ANGLE     ALint or ALfloat
- * Outer Angle                       AL_CONE_OUTER_ANGLE     ALint or ALfloat
- * Cone Outer Gain                   AL_CONE_OUTER_GAIN      ALint or ALfloat
- * Pitch                             AL_PITCH                ALfloat
- * Looping                           AL_LOOPING              ALint (AL_TRUE or AL_FALSE)
- * MS Offset                         AL_MSEC_OFFSET          ALint or ALfloat
- * Byte Offset                       AL_BYTE_OFFSET          ALint or ALfloat
- * Sample Offset                     AL_SAMPLE_OFFSET        ALint or ALfloat
- * Attached Buffer                   AL_BUFFER               ALint
- * State (Query only)                AL_SOURCE_STATE         ALint
- * Buffers Queued (Query only)       AL_BUFFERS_QUEUED       ALint
- * Buffers Processed (Query only)    AL_BUFFERS_PROCESSED    ALint
+(* 
+  SOURCE
+  Sources represent individual sound objects in 3D-space.
+  Sources take the PCM data provided in the specified Buffer,
+  apply Source-specific modifications, and then
+  submit them to be mixed according to spatial arrangement etc.
+  
+  Properties include: -
+ 
+  Gain                              AL_GAIN                 ALfloat
+  Min Gain                          AL_MIN_GAIN             ALfloat
+  Max Gain                          AL_MAX_GAIN             ALfloat
+  Position                          AL_POSITION             ALfloat[3]
+  Velocity                          AL_VELOCITY             ALfloat[3]
+  Direction                         AL_DIRECTION            ALfloat[3]
+  Head Relative Mode                AL_SOURCE_RELATIVE      ALint (AL_TRUE or AL_FALSE)
+  Reference Distance                AL_REFERENCE_DISTANCE   ALfloat
+  Max Distance                      AL_MAX_DISTANCE         ALfloat
+  RollOff Factor                    AL_ROLLOFF_FACTOR       ALfloat
+  Inner Angle                       AL_CONE_INNER_ANGLE     ALint or ALfloat
+  Outer Angle                       AL_CONE_OUTER_ANGLE     ALint or ALfloat
+  Cone Outer Gain                   AL_CONE_OUTER_GAIN      ALint or ALfloat
+  Pitch                             AL_PITCH                ALfloat
+  Looping                           AL_LOOPING              ALint (AL_TRUE or AL_FALSE)
+  MS Offset                         AL_MSEC_OFFSET          ALint or ALfloat
+  Byte Offset                       AL_BYTE_OFFSET          ALint or ALfloat
+  Sample Offset                     AL_SAMPLE_OFFSET        ALint or ALfloat
+  Attached Buffer                   AL_BUFFER               ALint
+  State (Query only)                AL_SOURCE_STATE         ALint
+  Buffers Queued (Query only)       AL_BUFFERS_QUEUED       ALint
+  Buffers Processed (Query only)    AL_BUFFERS_PROCESSED    ALint
  *)
 
 
@@ -531,18 +542,18 @@ alSourceRewind-: PROCEDURE { C }  (source : ALuint);
 alSourceQueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; buffers : PALuint);
 alSourceUnqueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; buffers : PALuint);
 
-(**
- * BUFFER
- * Buffer objects are storage space for sample data.
- * Buffers are referred to by Sources. One Buffer can be used
- * by multiple Sources.
- *
- * Properties include: -
- *
- * Frequency (Query only)    AL_FREQUENCY      ALint
- * Size (Query only)         AL_SIZE           ALint
- * Bits (Query only)         AL_BITS           ALint
- * Channels (Query only)     AL_CHANNELS       ALint
+(* 
+  BUFFER
+  Buffer objects are storage space for sample data.
+  Buffers are referred to by Sources. One Buffer can be used
+  by multiple Sources.
+ 
+  Properties include: -
+ 
+  Frequency (Query only)    AL_FREQUENCY      ALint
+  Size (Query only)         AL_SIZE           ALint
+  Bits (Query only)         AL_BITS           ALint
+  Channels (Query only)     AL_CHANNELS       ALint
  *)
 
 (* Create Buffer objects *)

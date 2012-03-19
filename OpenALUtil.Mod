@@ -1,9 +1,13 @@
 MODULE OpenALUtil; (** AUTHOR "fnecati"; PURPOSE "OpenAL utilities"; *)
-
 IMPORT  AL:=OpenAL, SYSTEM, KernelLog, SoundDevices, Codecs, Streams, Files, Modules, Strings;
 
+(* todo: 
+	can be wrapped as oberon objects, if you like; 
+	Source, Buffer, Device, Listener, etc.  OBJECTS
+*)
+
 CONST 
-	debug = TRUE;
+	debug = FALSE;
 	
 	openalPlayFile ="openalplay.ini"; (* configuration file for available list of play playdevices *) 
 	openalCapFile ="openalcap.ini";    (* configuration file for available list of capture playdevices *) 
@@ -62,31 +66,34 @@ BEGIN
 END ALCWriteError;
 
 
-(** load wave file to the created buffer buf*)
-PROCEDURE LoadWavFile*(VAR buf: AL.ALuint; CONST fname: ARRAY OF CHAR);
+(** load wave file data to the created AL buffer buf *)
+PROCEDURE LoadWavFileToBuffer*(CONST fname: ARRAY OF CHAR): AL.ALuint;
 VAR
 	fmt: AL.ALuint; 
 	dres: LONGINT;
 	file: Files.File;
 	in: Files.Reader;
 	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : LONGINT;
+	buffer : AL.ALuint;
+	err: LONGINT;
 BEGIN 
 	
 	file := Files.Old(fname);
 	IF file = NIL THEN
 		KernelLog.String(fname);  KernelLog.String( ": WAV file Open Error. "); KernelLog.Ln; 
-		RETURN 
+		RETURN 0;
 	END;
 
 	Files.OpenReader( in, file, 0);
 	wavdecoder.Open(in, dres);
 	IF dres # Codecs.ResOk THEN 
 		KernelLog.String( "WAV decoder Open Error. "); KernelLog.Ln; 
-		RETURN 
+		RETURN 0;
 	END;
 	
 	wavdecoder.GetAudioInfo(nofChannels, samplePerSecond, bitsPerSample);
 	samples := wavdecoder.GetTotalSamples();
+
 	(* data size in bytes *)
 	sizeBytes := samples*(bitsPerSample DIV 8)*nofChannels;
 	
@@ -95,7 +102,7 @@ BEGIN
 		KernelLog.String("samplePerSecond = "); KernelLog.Int(samplePerSecond, 0); KernelLog.Ln; 
 		KernelLog.String("bitsPerSample= "); KernelLog.Int(bitsPerSample, 0); KernelLog.Ln; 
 		KernelLog.String("samples= "); KernelLog.Int(samples, 0); KernelLog.Ln; 
-		KernelLog.String("sizeBytes= "); KernelLog.Int(sizeBytes, 0); KernelLog.Ln; 		
+		KernelLog.String("dataSize (bytes) = "); KernelLog.Int(sizeBytes, 0); KernelLog.Ln; 
 	END;
 
 	
@@ -126,12 +133,56 @@ BEGIN
 		KernelLog.String("fmt= "); KernelLog.Hex(fmt, 8); KernelLog.Ln; 
 	END;
 	
-	AL.alBufferData(buf, fmt, SYSTEM.ADR(sbuffer.data[0]), sizeBytes, samplePerSecond); 
+	(* create a buffer and load wav data into buffer *)
+	AL.alGenBuffers(1, SYSTEM.ADR(buffer)); 
+	ALWriteError("LoadWaveFile: alGenBuffers error: ");
 	
-	ALWriteError("LoadWavFile :  ");
-END LoadWavFile;
+	AL.alBufferData(buffer, fmt, SYSTEM.ADR(sbuffer.data[0]), sizeBytes, samplePerSecond); 
+	
+	err := AL.alGetError();
+	IF err # AL.AL_NO_ERROR THEN  RETURN 0; END;
+	
+	RETURN buffer;	
+END LoadWavFileToBuffer;
 
+(* listener procedures *)
+(** set position of the listener to x,y,z*)
+PROCEDURE SetListenerPosition*(x, y, z: REAL);
+BEGIN
+	AL.alListener3f(AL.AL_POSITION, x, y, z);
+END SetListenerPosition;
 
+(** set position of the listener to pos vector *)
+PROCEDURE SetListenerPositionv*(pos: ARRAY 3 OF REAL);
+BEGIN
+	AL.alListenerfv(AL.AL_POSITION, SYSTEM.ADR(pos[0]));
+END SetListenerPositionv;
+
+(** set velocity of the listener to x,y,z*)
+PROCEDURE SetListenerVelocity*(x, y, z: REAL);
+BEGIN
+	AL.alListener3f(AL.AL_VELOCITY, x, y, z);
+END SetListenerVelocity;
+
+(** set velocity of the listener to vel vector *)
+PROCEDURE SetListenerVelocityv*(vel: ARRAY 3 OF REAL);
+BEGIN
+	AL.alListenerfv(AL.AL_VELOCITY, SYSTEM.ADR(vel[0]));
+END SetListenerVelocityv;
+
+(** set velocity of the listener to vel vector *)
+PROCEDURE SetListenerOrientation*(x, y,  z: REAL);
+BEGIN
+	AL.alListener3f(AL.AL_ORIENTATION, x, y, z);
+END SetListenerOrientation;
+
+(** set orientation of the listener to dir vector *)
+PROCEDURE SetListenerOrientationv*(dir: ARRAY 3 OF REAL);
+BEGIN
+	AL.alListenerfv(AL.AL_ORIENTATION, SYSTEM.ADR(dir[0]));
+END SetListenerOrientationv;
+
+(* source procedures *)
 (** set source to looping mode *)
 PROCEDURE SetLoop*(source: AL.ALuint; loop: BOOLEAN);
 BEGIN
@@ -141,6 +192,19 @@ ELSE
 	AL.alSourcei(source, AL.AL_LOOPING, AL.AL_FALSE); 
 END
 END SetLoop;
+
+(** set position of the source to x,y,z*)
+PROCEDURE SetSourcePosition*(source: AL.ALuint; x, y, z: REAL);
+BEGIN
+	AL.alSource3f(source, AL.AL_POSITION, x, y, z);
+END SetSourcePosition;
+
+(** set position of the source to pos vector *)
+PROCEDURE SetSourcePositionv*(source: AL.ALuint; pos: ARRAY 3 OF REAL);
+BEGIN
+	AL.alSourcefv(source, AL.AL_POSITION, SYSTEM.ADR(pos[0]));
+END SetSourcePositionv;
+
 
 (** set gain of source *)
 PROCEDURE SetGain*(source: AL.ALuint; gain: AL.ALfloat);
@@ -153,7 +217,7 @@ BEGIN
 	AL.alSourcef(source, AL.AL_GAIN, g);
 END SetGain;
 
-(** set pitch of the sound *)
+(** set pitch of the source *)
 PROCEDURE SetPitch*(source: AL.ALuint; pitch: AL.ALfloat);
 VAR p: AL.ALfloat;
 BEGIN
@@ -163,6 +227,56 @@ BEGIN
 	END;
 	AL.alSourcef(source, AL.AL_PITCH, p);
 END SetPitch;
+
+(** play the source *)
+PROCEDURE Play*(source: AL.ALuint);
+BEGIN
+	AL.alSourcePlay(source);
+END Play;
+
+(** pause the source *)
+PROCEDURE Pause*(source: AL.ALuint);
+BEGIN
+	AL.alSourcePause(source);
+END Pause;
+
+(** stop the source *)
+PROCEDURE Stop*(source: AL.ALuint);
+BEGIN
+	AL.alSourceStop(source);
+END Stop;
+
+(** rewind the source position to beginning *)
+PROCEDURE Rewind*(source: AL.ALuint);
+BEGIN
+	AL.alSourceRewind(source);
+END Rewind;
+
+(* vector based procedures of above *)
+
+(** play the sources *)
+PROCEDURE Playv*(sources: ARRAY OF AL.ALuint);
+BEGIN
+	AL.alSourcePlayv(LEN(sources), SYSTEM.ADR(sources[0]));
+END Playv;
+
+(** pause the sources *)
+PROCEDURE Pausev*(sources: ARRAY OF AL.ALuint);
+BEGIN
+	AL.alSourcePausev(LEN(sources), SYSTEM.ADR(sources[0]));
+END Pausev;
+
+(** stop the sources *)
+PROCEDURE Stopv*(sources: ARRAY OF AL.ALuint);
+BEGIN
+	AL.alSourceStopv(LEN(sources), SYSTEM.ADR(sources[0]));
+END Stopv;
+
+(** rewind the sources position to beginning *)
+PROCEDURE Rewindv*(sources: ARRAY OF AL.ALuint);
+BEGIN
+	AL.alSourceRewindv(LEN(sources), SYSTEM.ADR(sources[0]));
+END Rewindv;
 
 
 PROCEDURE MakeContextCurrent*;
@@ -189,11 +303,10 @@ VAR
 BEGIN
 	 LoadDeviceName(openalPlayFile, s);
 	 KernelLog.String("Device from configuration file: ");  KernelLog.String(s); KernelLog.Ln; 
+	 
 	playdevice := AL.alcOpenDevice(s);
 	ALCWriteError(playdevice, "Device Open Error: ");	
-	KernelLog.String("opened dev= "); KernelLog.Int(playdevice, 0); KernelLog.Ln;
-	
-	IF playdevice = 0 THEN RETURN END;
+	ASSERT(playdevice # 0, 200);
 	
 	str := AL.ALCGetString(playdevice,   AL.ALC_DEVICE_SPECIFIER);
 		ALCWriteError(playdevice, "Device Specifier Error: ");	
@@ -211,6 +324,9 @@ BEGIN
 	IF wavdecoder = NIL THEN
 		KernelLog.String( "WAV decoder not installed"); KernelLog.Ln; 
 	END;
+	
+	ASSERT(wavdecoder # NIL, 201);
+	
 			
 	KernelLog.String("Device Opened" ); KernelLog.Ln; 	
 END OpenPlayDevice;
@@ -227,10 +343,8 @@ BEGIN
  
 	res := AL.alcMakeContextCurrent(0);
 	AL.alcDestroyContext(playcontext);  
-	res := AL.alcCloseDevice(playdevice); 
-
-	KernelLog.String("closed dev= "); KernelLog.Int(playdevice, 0); KernelLog.Ln;
-	KernelLog.String("close res: ");  KernelLog.Boolean(res); KernelLog.Ln; 		
+	res := AL.alcCloseDevice(playdevice);
+	
 	KernelLog.String("Device Closed. "); KernelLog.Ln; 		
 END ClosePlayDevice;
 
@@ -245,6 +359,8 @@ BEGIN
 	 KernelLog.String("Device from configuration file: ");  KernelLog.String(s); KernelLog.Ln; 
 	 
 	capturedevice := AL.alcCaptureOpenDevice(s, freq, fmt, samples); (* use default *)
+	ASSERT(capturedevice # 0, 202);
+	
 	str := AL.ALCGetString(capturedevice,   AL.ALC_CAPTURE_DEVICE_SPECIFIER);
 	KernelLog.String("ALC_CAPTURE_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
 
