@@ -2,14 +2,14 @@ MODULE OpenAL; (** AUTHOR "fnecati"; PURPOSE "OpenAL cross platform audio librar
 
 IMPORT
 	SYSTEM, Unix, Modules, Strings, KernelLog;
-	
-CONST 
+
+CONST
 	libname="libopenal.so";
 
 TYPE
   String256*=ARRAY 256 OF CHAR;
   PString256*= POINTER TO ARRAY OF String256;
-  
+
   ADDRESS = SYSTEM.ADDRESS;
 
  ALbyte    * =  CHAR;  (* 1-byte signed *)
@@ -47,18 +47,18 @@ CONST
   AL_SOURCE_RELATIVE                      * =  202H; (** Indicate Source has relative coordinates. *)
  (**
  * Directional source, inner cone angle, in degrees.
- * Range:    [0-360] 
+ * Range:    [0-360]
  * Default:  360
  *)
   AL_CONE_INNER_ANGLE                     * =  1001H;
 
 (**
  * Directional source, outer cone angle, in degrees.
- * Range:    [0-360] 
+ * Range:    [0-360]
  * Default:  360
- *)  
+ *)
   AL_CONE_OUTER_ANGLE                     * =  1002H;
-  
+
   (**
  * Specify the pitch to be applied, either at source,
  *  or on mixer results, at listener.
@@ -66,22 +66,22 @@ CONST
  * Default: 1.0
  *)
   AL_PITCH                                * =  1003H;
-  
-  (** 
+
+  (**
  * Specify the current location in three dimensional space.
  * OpenAL, like OpenGL, uses a right handed coordinate system,
- *  where in a frontal default view X (thumb) points right, 
+ *  where in a frontal default view X (thumb) points right,
  *  Y points up (index finger), and Z points towards the
- *  viewer/camera (middle finger). 
+ *  viewer/camera (middle finger).
  * To switch from a left handed coordinate system, flip the
  *  sign on the Z coordinate.
  * Listener position is always in the world coordinate system.
- *) 
+ *)
   AL_POSITION                             * =  1004H;
-  
-  AL_DIRECTION                            * =  1005H; (** Specify the current direction. *) 
+
+  AL_DIRECTION                            * =  1005H; (** Specify the current direction. *)
   AL_VELOCITY                             * =  1006H; (** Specify the current velocity in three dimensional space. *)
-  
+
   (**
  * Indicate whether source is looping.
  * Type: ALboolean?
@@ -89,16 +89,16 @@ CONST
  * Default: FALSE.
  *)
   AL_LOOPING                              * =  1007H;
-  
+
   (**
- * Indicate the buffer to provide sound samples. 
+ * Indicate the buffer to provide sound samples.
  * Type: ALuint.
  * Range: any valid Buffer id.
  *)
   AL_BUFFER                               * =  1009H;
-  
+
   (**
- * Indicate the gain (volume amplification) applied. 
+ * Indicate the gain (volume amplification) applied.
  * Type:   ALfloat.
  * Range:  ]0.0-  ]
  * A value of 1.0 means un-attenuated/unchanged.
@@ -109,7 +109,7 @@ CONST
  *  is effectively disabled.
  *)
   AL_GAIN                                 * =  100AH;
-  
+
   (*
  * Indicate minimum source attenuation
  * Type: ALfloat
@@ -118,7 +118,7 @@ CONST
  * Logarthmic
  *)
   AL_MIN_GAIN                             * =  100DH;
-  
+
  (**
  * Indicate maximum source attenuation
  * Type: ALfloat
@@ -127,24 +127,24 @@ CONST
  * Logarthmic
  *)
   AL_MAX_GAIN                             * =  100EH;
-  
+
   (**  Indicate listener orientation.  at/up  *)
   AL_ORIENTATION                          * =  100FH;
 
- 
+
 (*   AL_CHANNEL_MASK                         * =  3000H; *)
-  
+
   (**  Source state information. *)
   AL_SOURCE_STATE                         * =  1010H;
   AL_INITIAL                              * =  1011H;
   AL_PLAYING                              * =  1012H;
   AL_PAUSED                               * =  1013H;
   AL_STOPPED                              * =  1014H;
-  
+
   (**  Buffer Queue params *)
   AL_BUFFERS_QUEUED                       * =  1015H;
   AL_BUFFERS_PROCESSED                    * =  1016H;
- 
+
  (**  Source buffer position information *)
   AL_SEC_OFFSET                   * = 1024H;
   AL_SAMPLE_OFFSET                * = 1025H;
@@ -161,12 +161,12 @@ CONST
   AL_STREAMING                     * = 1029H;
   AL_UNDETERMINED                  * = 1030H;
 
-(** Sound samples: format specifier. *) 
+(** Sound samples: format specifier. *)
   AL_FORMAT_MONO8                         * =  1100H;
   AL_FORMAT_MONO16                        * =  1101H;
   AL_FORMAT_STEREO8                       * =  1102H;
   AL_FORMAT_STEREO16                      * =  1103H;
-  
+
 (**
  * source specific reference distance
  * Type: ALfloat
@@ -204,13 +204,13 @@ CONST
  *)
   AL_MAX_DISTANCE                  * = 1023H;
 
-(** 
+(**
  * Sound samples: frequency, in units of Hertz [Hz].
  * This is the number of samples per second. Half of the
  *  sample frequency marks the maximum significant
  *  frequency component.
  *)
-  
+
   AL_FREQUENCY                            * =  2001H;
   AL_BITS                                 * =  2002H;
   AL_CHANNELS                             * =  2003H;
@@ -220,7 +220,7 @@ CONST
  * Buffer state.
  *
  * Not supported for public use (yet).
- *)  
+ *)
 
   AL_UNUSED                               * =  2010H;
   AL_PENDING                              * =  2011H;
@@ -228,7 +228,7 @@ CONST
 
 (** Errors: No Error. *)
   AL_NO_ERROR                             * =  AL_FALSE;
-  
+
   AL_INVALID_NAME                         * =  0A001H; (**  Invalid Name paramater passed to AL call. *)
   AL_INVALID_ENUM                         * =  0A002H; (**  Invalid parameter passed to AL call. *)
   AL_INVALID_VALUE                        * =  0A003H; (**  Invalid enum parameter value. *)
@@ -240,7 +240,7 @@ CONST
   AL_VERSION                              * =  0B002H;
   AL_RENDERER                             * =  0B003H;
   AL_EXTENSIONS                           * =  0B004H;
-  
+
   AL_DOPPLER_FACTOR                       * =  0C000H; (** Doppler scale.  Default 1.0 *)
   AL_DOPPLER_VELOCITY                     * =  0C001H; (** Tweaks speed of propagation. *)
   AL_SPEED_OF_SOUND                * = 0C003H;   (** Speed of Sound in units per second *)
@@ -307,20 +307,20 @@ CONST
   ALC_DEFAULT_DEVICE_SPECIFIER            * =  1004H;
   ALC_DEVICE_SPECIFIER                    * =  1005H;
   ALC_EXTENSIONS                          * =  1006H;
-  
- 
+
+
  (** Capture extension *)
   ALC_CAPTURE_DEVICE_SPECIFIER     * = 310H;
   ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER * = 311H;
   ALC_CAPTURE_SAMPLES              * = 312H;
- 
+
   ALC_FREQUENCY                           * =  1007H;  (* followed by <int> Hz *)
   ALC_REFRESH                             * =  1008H; (* followed by <int> Hz *)
   ALC_SYNC                                * =  1009H; (* followed by AL_TRUE, AL_FALSE *)
   ALC_MONO_SOURCES                 * = 1010H; (*  followed by <int> Num of requested Mono (3D) Sources *)
   ALC_STEREO_SOURCES               * = 1011H; (* followed by <int> Num of requested Stereo Sources *)
- 
- (** errors *) 
+
+ (** errors *)
    ALC_NO_ERROR                            * =  ALC_FALSE;
   ALC_INVALID_DEVICE                      * =  0A001H;
   ALC_INVALID_CONTEXT                     * =  0A002H;
@@ -384,7 +384,7 @@ CONST
   AL_FORMAT_STEREO_IMA4                    * =1301H;
 
   ALC_CONNECTED                            * =313H;
-  
+
   AL_SOURCE_DISTANCE_MODEL*               =  200H;
 
   AL_BYTE_RW_OFFSETS_SOFT*             = 1031H;
@@ -395,10 +395,10 @@ CONST
 
 
 VAR
-  
+
   xlib: LONGINT;
-  
-(* Renderer State management *)	
+
+(* Renderer State management *)
 alEnable-: PROCEDURE { C } (capability : ALenum);
 alDisable -: PROCEDURE { C } (capability : ALenum);
 alIsEnabled-: PROCEDURE { C } (capability : ALenum) : ALboolean;
@@ -420,7 +420,7 @@ alGetString-: PROCEDURE { C } (param : ALenum) : PALubyte;
  *)
 alGetError-: PROCEDURE { C } () : ALenum;
 
-(* 
+(*
  * Extension support.
  * Query for the presence of an extension, and obtain any appropriate
  * function pointers and enum values.
@@ -432,14 +432,14 @@ alGetEnumValue-: PROCEDURE { C } (VAR ename : ALubyte) : ALenum;
  (*  LISTENER
   Listener represents the location and orientation of the
   'user' in 3D-space.
- 
+
   Properties include: -
- 
+
   Gain         AL_GAIN         ALfloat
   Position     AL_POSITION     ALfloat[3]
   Velocity     AL_VELOCITY     ALfloat[3]
   Orientation  AL_ORIENTATION  ALfloat[6] (Forward then Up vectors)
-*) 
+*)
 
 (* Set Listener parameters *)
 alListenerf-: PROCEDURE { C } (param : ALenum; value : ALfloat);
@@ -457,15 +457,15 @@ alGetListeneri-: PROCEDURE { C } (param : ALenum; VAR value : ALint);
 alGetListener3i-: PROCEDURE { C } (param : ALenum; VAR v1, v2, v3:  ALint);
 alGetListeneriv-: PROCEDURE { C } (param : ALenum; values : PALint);
 
-(* 
+(*
   SOURCE
   Sources represent individual sound objects in 3D-space.
   Sources take the PCM data provided in the specified Buffer,
   apply Source-specific modifications, and then
   submit them to be mixed according to spatial arrangement etc.
-  
+
   Properties include: -
- 
+
   Gain                              AL_GAIN                 ALfloat
   Min Gain                          AL_MIN_GAIN             ALfloat
   Max Gain                          AL_MAX_GAIN             ALfloat
@@ -491,13 +491,13 @@ alGetListeneriv-: PROCEDURE { C } (param : ALenum; values : PALint);
  *)
 
 
-(* Create Source objects *) 
+(* Create Source objects *)
 alGenSources-: PROCEDURE { C } (n : ALsizei; sources : PALuint);
 
 (* Delete Source objects *)
 alDeleteSources-: PROCEDURE { C } (n : ALsizei; sources : PALuint);
 
-(* Verify a handle is a valid Source *) 
+(* Verify a handle is a valid Source *)
 alIsSource-: PROCEDURE { C } (id : ALuint) : ALboolean;
 
 (* Set Source parameters *)
@@ -542,14 +542,14 @@ alSourceRewind-: PROCEDURE { C }  (source : ALuint);
 alSourceQueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; buffers : PALuint);
 alSourceUnqueueBuffers-: PROCEDURE { C } (source : ALuint; n : ALsizei; buffers : PALuint);
 
-(* 
+(*
   BUFFER
   Buffer objects are storage space for sample data.
   Buffers are referred to by Sources. One Buffer can be used
   by multiple Sources.
- 
+
   Properties include: -
- 
+
   Frequency (Query only)    AL_FREQUENCY      ALint
   Size (Query only)         AL_SIZE           ALint
   Bits (Query only)         AL_BITS           ALint
@@ -591,7 +591,9 @@ alDopplerVelocity-: PROCEDURE { C } (value : ALfloat);
 
 
 (* Device Management *)
-alcOpenDevice-: PROCEDURE { C } (CONST deviceName : ARRAY OF CHAR) : ALCdevice;
+(*! alcOpenDevice-: PROCEDURE { C } (CONST deviceName : ARRAY OF CHAR) : ALCdevice; *)
+alcOpenDeviceXXX-: PROCEDURE { C } (deviceName : ADDRESS) : ALCdevice;
+
 alcCloseDevice-: PROCEDURE { C } (device : ALCdevice): ALCboolean;
 (* Context Management *)
 alcCreateContext-: PROCEDURE { C } (device : ALCdevice; attrList : PALCint) : ALCcontext;
@@ -609,13 +611,17 @@ alcDestroyContext-: PROCEDURE { C } (context : ALCcontext);
 alcGetError-: PROCEDURE { C } (device : ALCdevice) : ALCenum;
 
 
-(* 
+(*
  * Extension support.
  * Query for the presence of an extension, and obtain any appropriate
  * function pointers and enum values.
  *)
-alcIsExtensionPresent- : PROCEDURE { C } (device : ALCdevice; CONST extName : ARRAY OF CHAR) : ALCboolean;
-alcGetProcAddress-: PROCEDURE { C } (device : ALCdevice; CONST funcName:  ARRAY OF CHAR): ADDRESS;
+(*! alcIsExtensionPresent- : PROCEDURE { C } (device : ALCdevice; CONST extName : ARRAY OF CHAR) : ALCboolean; *)
+alcIsExtensionPresentXXX- : PROCEDURE { C } (device : ALCdevice; extName : ADDRESS) : ALCboolean;
+
+(*! alcGetProcAddress-: PROCEDURE { C } (device : ALCdevice; CONST funcName:  ARRAY OF CHAR): ADDRESS; *)
+alcGetProcAddressXXX-: PROCEDURE { C } (device : ALCdevice; funcName:  ADDRESS): ADDRESS;
+
 alcGetEnumValue-: PROCEDURE { C } (device : ALCdevice; VAR enumName : ALCubyte) : ALCenum;
 
 
@@ -626,10 +632,15 @@ alcGetString-: PROCEDURE { C } (device : ALCdevice; param : ALCenum) : LONGINT;
 alcGetIntegerv -: PROCEDURE { C } ( device : ALCdevice; param : ALCenum; size : ALCsizei;  data : PALCint);
 
 (* Capture functions *)
-alcCaptureOpenDevice-:  PROCEDURE { C } (CONST devicename: ARRAY OF CHAR; frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
+(*! alcCaptureOpenDevice-:  PROCEDURE { C } (CONST devicename: ARRAY OF CHAR; frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; *)
+alcCaptureOpenDeviceXXX-:  PROCEDURE { C } (devicename: ADDRESS; 
+										frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
+
+
+
 alcCaptureCloseDevice-: PROCEDURE { C } (device: ALCdevice): ALCboolean;
-alcCaptureStart-:  PROCEDURE { C } (device: ALCdevice); 
-alcCaptureStop-: PROCEDURE { C } (device: ALCdevice); 
+alcCaptureStart-:  PROCEDURE { C } (device: ALCdevice);
+alcCaptureStop-: PROCEDURE { C } (device: ALCdevice);
 alcCaptureSamples-: PROCEDURE { C } (device: ALCdevice; buffer: ADDRESS; samples: ALCsizei);
 
 (*
@@ -639,12 +650,12 @@ alcSetThreadContext-: PROCEDURE { C }(context: ALCcontext ): ALCboolean;
 alcGetThreadContext-: PROCEDURE { C } (): ALCcontext;
 alBufferSubDataSOFT-: PROCEDURE { C } (buffer: ALuint; format: ALenum; data: ADDRESS; offset: ALsizei; lengthx: ALsizei);
 *)
-	
+
 PROCEDURE LoadFunctions;
-BEGIN 
+BEGIN
 		xlib := Unix.Dlopen(libname, 2 );
 		ASSERT(xlib # 0, 103);
-		
+
 		Unix.Dlsym( xlib, "alEnable", SYSTEM.VAL( ADDRESS, alEnable));
 		Unix.Dlsym( xlib, "alDisable", SYSTEM.VAL( ADDRESS, alDisable));
 		Unix.Dlsym( xlib, "alIsEnabled", SYSTEM.VAL( ADDRESS, alIsEnabled));
@@ -661,33 +672,33 @@ BEGIN
 		Unix.Dlsym( xlib, "alIsExtensionPresent", SYSTEM.VAL( ADDRESS, alIsExtensionPresent));
 		Unix.Dlsym( xlib, "alGetProcAddress", SYSTEM.VAL( ADDRESS, alGetProcAddress));
 		Unix.Dlsym( xlib, "alGetEnumValue", SYSTEM.VAL( ADDRESS, alGetEnumValue));
-		
+
 		Unix.Dlsym( xlib, "alListenerf", SYSTEM.VAL( ADDRESS, alListenerf));
 		Unix.Dlsym( xlib, "alListener3f", SYSTEM.VAL( ADDRESS, alListener3f));
 		Unix.Dlsym( xlib, "alListenerfv", SYSTEM.VAL( ADDRESS, alListenerfv));
 		Unix.Dlsym( xlib, "alListeneri", SYSTEM.VAL( ADDRESS, alListeneri));
 		Unix.Dlsym( xlib, "alListener3i", SYSTEM.VAL( ADDRESS, alListener3i));
 		Unix.Dlsym( xlib, "alListeneriv", SYSTEM.VAL( ADDRESS, alListeneriv));
-		
+
 		Unix.Dlsym( xlib, "alGetListenerf", SYSTEM.VAL( ADDRESS, alGetListenerf));
 		Unix.Dlsym( xlib, "alGetListener3f", SYSTEM.VAL( ADDRESS, alGetListener3f));
 		Unix.Dlsym( xlib, "alGetListenerfv", SYSTEM.VAL( ADDRESS, alGetListenerfv));
 		Unix.Dlsym( xlib, "alGetListeneri", SYSTEM.VAL( ADDRESS, alGetListeneri));
 		Unix.Dlsym( xlib, "alGetListener3i", SYSTEM.VAL( ADDRESS, alGetListener3i));
 		Unix.Dlsym( xlib, "alGetListeneriv", SYSTEM.VAL( ADDRESS, alGetListeneriv));
-								
+
 		Unix.Dlsym( xlib, "alGenSources", SYSTEM.VAL( ADDRESS, alGenSources));
 		Unix.Dlsym( xlib, "alDeleteSources", SYSTEM.VAL( ADDRESS, alDeleteSources));
 		Unix.Dlsym( xlib, "alIsSource", SYSTEM.VAL( ADDRESS, alIsSource));
 		Unix.Dlsym( xlib, "alSourcei", SYSTEM.VAL( ADDRESS, alSourcei));
-		
+
 		Unix.Dlsym( xlib, "alSourcef", SYSTEM.VAL( ADDRESS, alSourcef));
 		Unix.Dlsym( xlib, "alSource3f", SYSTEM.VAL( ADDRESS, alSource3f));
 		Unix.Dlsym( xlib, "alSourcefv", SYSTEM.VAL( ADDRESS, alSourcefv));
 		Unix.Dlsym( xlib, "alSourcei", SYSTEM.VAL( ADDRESS, alSourcei));
 		Unix.Dlsym( xlib, "alSource3i", SYSTEM.VAL( ADDRESS, alSource3i));
 		Unix.Dlsym( xlib, "alSourceiv", SYSTEM.VAL( ADDRESS, alSourceiv));
-				
+
 		Unix.Dlsym( xlib, "alGetSourcef", SYSTEM.VAL( ADDRESS, alGetSourcef));
 		Unix.Dlsym( xlib, "alGetSource3f", SYSTEM.VAL( ADDRESS, alGetSource3f));
 		Unix.Dlsym( xlib, "alGetSourcefv", SYSTEM.VAL( ADDRESS, alGetSourcefv));
@@ -703,7 +714,7 @@ BEGIN
 		Unix.Dlsym( xlib, "alSourcePause", SYSTEM.VAL( ADDRESS, alSourcePause));
 		Unix.Dlsym( xlib, "alSourceStop", SYSTEM.VAL( ADDRESS, alSourceStop));
 		Unix.Dlsym( xlib, "alSourceRewind", SYSTEM.VAL( ADDRESS, alSourceRewind));
-		
+
 		Unix.Dlsym( xlib, "alGenBuffers", SYSTEM.VAL( ADDRESS, alGenBuffers));
 		Unix.Dlsym( xlib, "alDeleteBuffers", SYSTEM.VAL( ADDRESS, alDeleteBuffers));
 		Unix.Dlsym( xlib, "alIsBuffer", SYSTEM.VAL( ADDRESS, alIsBuffer));
@@ -715,7 +726,7 @@ BEGIN
 		Unix.Dlsym( xlib, "alBufferi", SYSTEM.VAL( ADDRESS, alBufferi));
 		Unix.Dlsym( xlib, "alBuffer3i", SYSTEM.VAL( ADDRESS, alBuffer3i));
 		Unix.Dlsym( xlib, "alBufferiv", SYSTEM.VAL( ADDRESS, alBufferiv));
-		
+
 		Unix.Dlsym( xlib, "alGetBufferf", SYSTEM.VAL( ADDRESS, alGetBufferf));
 		Unix.Dlsym( xlib, "alGetBuffer3f", SYSTEM.VAL( ADDRESS, alGetBuffer3f));
 		Unix.Dlsym( xlib, "alGetBufferfv", SYSTEM.VAL( ADDRESS, alGetBufferfv));
@@ -729,9 +740,9 @@ BEGIN
 		Unix.Dlsym( xlib, "alDopplerFactor", SYSTEM.VAL( ADDRESS, alDopplerFactor));
 		Unix.Dlsym( xlib, "alSpeedOfSound", SYSTEM.VAL( ADDRESS, alSpeedOfSound));
 		Unix.Dlsym( xlib, "alDopplerVelocity", SYSTEM.VAL( ADDRESS, alDopplerVelocity));
-		
-		
-		Unix.Dlsym( xlib, "alcOpenDevice", SYSTEM.VAL( ADDRESS, alcOpenDevice));
+
+
+		Unix.Dlsym( xlib, "alcOpenDevice", SYSTEM.VAL( ADDRESS, alcOpenDeviceXXX));
 		Unix.Dlsym( xlib, "alcCloseDevice", SYSTEM.VAL( ADDRESS, alcCloseDevice));
 		Unix.Dlsym( xlib, "alcCreateContext", SYSTEM.VAL( ADDRESS, alcCreateContext));
 		Unix.Dlsym( xlib, "alcMakeContextCurrent", SYSTEM.VAL( ADDRESS, alcMakeContextCurrent));
@@ -744,11 +755,11 @@ BEGIN
 		Unix.Dlsym( xlib, "alcGetString", SYSTEM.VAL( ADDRESS, alcGetString));
 		Unix.Dlsym( xlib, "alcGetIntegerv", SYSTEM.VAL( ADDRESS, alcGetIntegerv));
 
-		Unix.Dlsym( xlib, "alcIsExtensionPresent", SYSTEM.VAL( ADDRESS, alcIsExtensionPresent));
-		Unix.Dlsym( xlib, "alcGetProcAddress", SYSTEM.VAL( ADDRESS, alcGetProcAddress));
+		Unix.Dlsym( xlib, "alcIsExtensionPresent", SYSTEM.VAL( ADDRESS, alcIsExtensionPresentXXX));
+		Unix.Dlsym( xlib, "alcGetProcAddress", SYSTEM.VAL( ADDRESS, alcGetProcAddressXXX));
 		Unix.Dlsym( xlib, "alcGetEnumValue", SYSTEM.VAL( ADDRESS, alcGetEnumValue));
-	
-		Unix.Dlsym( xlib, "alcCaptureOpenDevice", SYSTEM.VAL( ADDRESS, alcCaptureOpenDevice));
+
+		Unix.Dlsym( xlib, "alcCaptureOpenDevice", SYSTEM.VAL( ADDRESS, alcCaptureOpenDeviceXXX));
 		Unix.Dlsym( xlib, "alcCaptureCloseDevice", SYSTEM.VAL( ADDRESS, alcCaptureCloseDevice));
 		Unix.Dlsym( xlib, "alcCaptureStart", SYSTEM.VAL( ADDRESS, alcCaptureStart));
 		Unix.Dlsym( xlib, "alcCaptureStop", SYSTEM.VAL( ADDRESS, alcCaptureStop));
@@ -759,20 +770,50 @@ BEGIN
 		Unix.Dlsym( xlib, "alBufferDataStatic", SYSTEM.VAL( ADDRESS, alBufferDataStatic));
 		Unix.Dlsym( xlib, "alcSetThreadContext", SYSTEM.VAL( ADDRESS, alcSetThreadContext));
 		Unix.Dlsym( xlib, "alcGetThreadContext", SYSTEM.VAL( ADDRESS, alcGetThreadContext));
-		Unix.Dlsym( xlib, "alBufferSubDataSOFT", SYSTEM.VAL( ADDRESS, alBufferSubDataSOFT)); 
-*)		
+		Unix.Dlsym( xlib, "alBufferSubDataSOFT", SYSTEM.VAL( ADDRESS, alBufferSubDataSOFT));
+*)
 
 END LoadFunctions;
 
 PROCEDURE OnClose;
-BEGIN 
+BEGIN
  IF xlib # 0 THEN
        Unix.Dlclose(xlib);
-       KernelLog.String(libname); KernelLog.String(' unloaded.'); KernelLog.Ln; 
+       KernelLog.String(libname); KernelLog.String(' unloaded.'); KernelLog.Ln;
 END;
 END OnClose;
 
-(* utilities *)
+(* utilities, and wrappers  *)
+
+PROCEDURE alcOpenDevice*( CONST deviceName: ARRAY OF CHAR ): ALCdevice;
+VAR dev: ALCdevice;
+BEGIN
+	dev := alcOpenDeviceXXX( SYSTEM.ADR( deviceName[0] ) );
+	RETURN dev
+END alcOpenDevice;
+
+PROCEDURE alcCaptureOpenDevice*( CONST deviceName: ARRAY OF CHAR; 
+								frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
+VAR dev: ALCdevice;
+BEGIN
+	dev := alcCaptureOpenDeviceXXX( SYSTEM.ADR( deviceName[0] ), frequency, format, buffersize );
+	RETURN dev
+END alcCaptureOpenDevice;
+
+PROCEDURE alcIsExtensionPresent* (device : ALCdevice; CONST extName : ARRAY OF CHAR) : ALCboolean;
+VAR res: ALCboolean;
+BEGIN
+	res := alcIsExtensionPresentXXX(device, SYSTEM.ADR(extName[0]));
+	RETURN res;
+END alcIsExtensionPresent;
+
+PROCEDURE alcGetProcAddress* (device : ALCdevice; CONST funcName: ARRAY OF CHAR): ADDRESS;
+VAR adr: ADDRESS;
+BEGIN
+	adr := alcGetProcAddressXXX (device, SYSTEM.ADR(funcName[0]));
+	RETURN adr;
+END alcGetProcAddress;
+
 (* Get string from address *)
 PROCEDURE GetStringFromAddr(adr: LONGINT): Strings.String;
 VAR  sadr, sadr1: LONGINT;
@@ -781,18 +822,18 @@ VAR  sadr, sadr1: LONGINT;
 		s: Strings.String;
 BEGIN
 	sadr := adr;
-	
+
 	(* find length *)
 	cnt :=0;
 	sadr1 := sadr;
-	IF sadr1 # 0 THEN 
+	IF sadr1 # 0 THEN
 		SYSTEM.GET(sadr1,ch);
 		WHILE (ch # 0X) DO  INC(cnt); INC(sadr1); SYSTEM.GET(sadr1,ch); END;
 	END;
-	
-	IF cnt = 0 THEN  (* empty string *)	
+
+	IF cnt = 0 THEN  (* empty string *)
 		NEW(s,1); s[0]:=0X; 	RETURN s
-	END; 
+	END;
 
 	NEW(s, cnt+1);
 	i:=0;
@@ -802,23 +843,23 @@ BEGIN
 		s^[i] := ch; INC(i); INC(sadr1);
 		SYSTEM.GET(sadr1,ch);
 	END;
-	RETURN s;	
-	
+	RETURN s;
+
 END GetStringFromAddr;
 
 
 PROCEDURE ALGetString*( name: ALCenum): Strings.String;
 VAR  sadr: LONGINT;
-BEGIN 
+BEGIN
 	sadr := alGetString( name);
-	RETURN GetStringFromAddr(sadr);	
+	RETURN GetStringFromAddr(sadr);
 END ALGetString;
 
 PROCEDURE ALCGetString*(device: ALCdevice; name: ALCenum): Strings.String;
 VAR  sadr: LONGINT;
-BEGIN 
+BEGIN
 	sadr := alcGetString(device, name);
-	RETURN GetStringFromAddr(sadr);	
+	RETURN GetStringFromAddr(sadr);
 END ALCGetString;
 
 
@@ -829,18 +870,18 @@ VAR  sadr, sadr1: LONGINT;
 		s: Strings.String;
 BEGIN
 	sadr := adr;
-	
+
 	(* find length *)
 	cnt :=0;
 	sadr1 := sadr;
-	IF sadr1 # 0 THEN 
+	IF sadr1 # 0 THEN
 		SYSTEM.GET(sadr1,ch);
 		WHILE (ch # 0X) DO  INC(cnt); INC(sadr1); SYSTEM.GET(sadr1,ch); END;
 	END;
-	
-	IF cnt = 0 THEN  (* empty string or end of list *)	
+
+	IF cnt = 0 THEN  (* empty string or end of list *)
 		RETURN NIL
-	END; 
+	END;
 
 	(* copy chars to string *)
 	NEW(s, cnt+1);
@@ -851,8 +892,8 @@ BEGIN
 		s^[i] := ch; INC(i); INC(sadr1);
 		SYSTEM.GET(sadr1,ch);
 	END;
-	RETURN s;	
-	
+	RETURN s;
+
 END GetDevStringFromAddr;
 
 (** go through device list,  (each device terminated with a single NULL, list terminated with double NULL *)
@@ -876,7 +917,7 @@ BEGIN
 		END;
 
 
-		(* copy to string list *)		
+		(* copy to string list *)
 		NEW(dynstr, index);
 		sadr0 := alcGetString(device, name);
 		sadr := sadr0;
@@ -889,16 +930,16 @@ BEGIN
 			str := GetDevStringFromAddr(sadr);
 			INC(index);
 		END;
-				
-	RETURN dynstr;	
+
+	RETURN dynstr;
 END ALCGetDeviceList;
 
-	
+
 BEGIN
 LoadFunctions;
 Modules.InstallTermHandler(OnClose) ;
 
 END OpenAL.
 
-SystemTools.Free OpenAL~ 
+SystemTools.Free OpenAL~
 
