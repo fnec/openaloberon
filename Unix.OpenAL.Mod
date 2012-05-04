@@ -425,8 +425,10 @@ alGetError-: PROCEDURE { C } () : ALenum;
  * Query for the presence of an extension, and obtain any appropriate
  * function pointers and enum values.
  *)
-alIsExtensionPresent-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR) : ALboolean;
-alGetProcAddress-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR): ADDRESS;
+(*! alIsExtensionPresent-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR) : ALboolean; *)
+alIsExtensionPresentXXX-: PROCEDURE { C } (fname : ADDRESS) : ALboolean; 
+(*! alGetProcAddress-: PROCEDURE { C } (CONST fname : ARRAY OF CHAR): ADDRESS; *)
+alGetProcAddressXXX-: PROCEDURE { C } (fname : ADDRESS): ADDRESS;
 alGetEnumValue-: PROCEDURE { C } (VAR ename : ALubyte) : ALenum;
 
  (*  LISTENER
@@ -588,8 +590,6 @@ alSpeedOfSound-: PROCEDURE { C } (value : ALfloat);
 alDopplerVelocity-: PROCEDURE { C } (value : ALfloat);
 
 
-
-
 (* Device Management *)
 (*! alcOpenDevice-: PROCEDURE { C } (CONST deviceName : ARRAY OF CHAR) : ALCdevice; *)
 alcOpenDeviceXXX-: PROCEDURE { C } (deviceName : ADDRESS) : ALCdevice;
@@ -625,17 +625,13 @@ alcGetProcAddressXXX-: PROCEDURE { C } (device : ALCdevice; funcName:  ADDRESS):
 alcGetEnumValue-: PROCEDURE { C } (device : ALCdevice; VAR enumName : ALCubyte) : ALCenum;
 
 
-
-
 (* Query functions *)
 alcGetString-: PROCEDURE { C } (device : ALCdevice; param : ALCenum) : LONGINT;
 alcGetIntegerv -: PROCEDURE { C } ( device : ALCdevice; param : ALCenum; size : ALCsizei;  data : PALCint);
 
 (* Capture functions *)
 (*! alcCaptureOpenDevice-:  PROCEDURE { C } (CONST devicename: ARRAY OF CHAR; frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; *)
-alcCaptureOpenDeviceXXX-:  PROCEDURE { C } (devicename: ADDRESS; 
-										frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
-
+alcCaptureOpenDeviceXXX-:  PROCEDURE { C } (devicename: ADDRESS; frequency: ALCuint; format: ALCenum; buffersize: ALCsizei):ALCdevice;
 
 
 alcCaptureCloseDevice-: PROCEDURE { C } (device: ALCdevice): ALCboolean;
@@ -669,8 +665,8 @@ BEGIN
 		Unix.Dlsym( xlib, "alGetDoublev", SYSTEM.VAL( ADDRESS, alGetDoublev));
 		Unix.Dlsym( xlib, "alGetString", SYSTEM.VAL( ADDRESS, alGetString));
 		Unix.Dlsym( xlib, "alGetError", SYSTEM.VAL( ADDRESS, alGetError));
-		Unix.Dlsym( xlib, "alIsExtensionPresent", SYSTEM.VAL( ADDRESS, alIsExtensionPresent));
-		Unix.Dlsym( xlib, "alGetProcAddress", SYSTEM.VAL( ADDRESS, alGetProcAddress));
+		Unix.Dlsym( xlib, "alIsExtensionPresent", SYSTEM.VAL( ADDRESS, alIsExtensionPresentXXX));
+		Unix.Dlsym( xlib, "alGetProcAddress", SYSTEM.VAL( ADDRESS, alGetProcAddressXXX));
 		Unix.Dlsym( xlib, "alGetEnumValue", SYSTEM.VAL( ADDRESS, alGetEnumValue));
 
 		Unix.Dlsym( xlib, "alListenerf", SYSTEM.VAL( ADDRESS, alListenerf));
@@ -785,6 +781,20 @@ END OnClose;
 
 (* utilities, and wrappers  *)
 
+PROCEDURE alIsExtensionPresent* (CONST extName : ARRAY OF CHAR) : ALCboolean;
+VAR res: ALCboolean;
+BEGIN
+	res := alIsExtensionPresentXXX(SYSTEM.ADR(extName[0]));
+	RETURN res;
+END alIsExtensionPresent;
+
+PROCEDURE alGetProcAddress* (CONST funcName: ARRAY OF CHAR): ADDRESS;
+VAR adr: ADDRESS;
+BEGIN
+	adr := alGetProcAddressXXX (SYSTEM.ADR(funcName[0]));
+	RETURN adr;
+END alGetProcAddress;
+
 PROCEDURE alcOpenDevice*( CONST deviceName: ARRAY OF CHAR ): ALCdevice;
 VAR dev: ALCdevice;
 BEGIN
@@ -792,8 +802,7 @@ BEGIN
 	RETURN dev
 END alcOpenDevice;
 
-PROCEDURE alcCaptureOpenDevice*( CONST deviceName: ARRAY OF CHAR; 
-								frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
+PROCEDURE alcCaptureOpenDevice*( CONST deviceName: ARRAY OF CHAR; frequency: ALCuint; format: ALCenum; buffersize: ALCsizei): ALCdevice; 
 VAR dev: ALCdevice;
 BEGIN
 	dev := alcCaptureOpenDeviceXXX( SYSTEM.ADR( deviceName[0] ), frequency, format, buffersize );
@@ -817,9 +826,9 @@ END alcGetProcAddress;
 (* Get string from address *)
 PROCEDURE GetStringFromAddr(adr: LONGINT): Strings.String;
 VAR  sadr, sadr1: LONGINT;
-		i, cnt: LONGINT;
-		ch: CHAR;
-		s: Strings.String;
+	i, cnt: LONGINT;
+	ch: CHAR;
+	s: Strings.String;
 BEGIN
 	sadr := adr;
 
@@ -844,7 +853,6 @@ BEGIN
 		SYSTEM.GET(sadr1,ch);
 	END;
 	RETURN s;
-
 END GetStringFromAddr;
 
 
@@ -862,12 +870,11 @@ BEGIN
 	RETURN GetStringFromAddr(sadr);
 END ALCGetString;
 
-
 PROCEDURE GetDevStringFromAddr(adr: LONGINT): Strings.String;
 VAR  sadr, sadr1: LONGINT;
-		i, cnt: LONGINT;
-		ch: CHAR;
-		s: Strings.String;
+	i, cnt: LONGINT;
+	ch: CHAR;
+	s: Strings.String;
 BEGIN
 	sadr := adr;
 
@@ -893,7 +900,6 @@ BEGIN
 		SYSTEM.GET(sadr1,ch);
 	END;
 	RETURN s;
-
 END GetDevStringFromAddr;
 
 (** go through device list,  (each device terminated with a single NULL, list terminated with double NULL *)
@@ -903,33 +909,32 @@ VAR  sadr, sadr0: LONGINT;
 	str: Strings.String;
 	dynstr: PString256;
 BEGIN
-
-		(* count the number of devices in the list *)
-		sadr0 := alcGetString(device, name);
-		sadr := sadr0;
+	(* count the number of devices in the list *)
+	sadr0 := alcGetString(device, name);
+	sadr := sadr0;
+	str := GetDevStringFromAddr(sadr);
+	index := 0;
+	WHILE (str  # NIL) & (index<10)  DO (* limit the count *)
+		slen := Strings.Length(str^);
+		sadr := sadr + slen +1;
 		str := GetDevStringFromAddr(sadr);
-		index := 0;
-		WHILE (str  # NIL) & (index<10)  DO (* limit the count *)
-      			slen := Strings.Length(str^);
-			sadr := sadr + slen +1;
-			str := GetDevStringFromAddr(sadr);
-			INC(index);
-		END;
+		INC(index);
+	END;
 
 
-		(* copy to string list *)
-		NEW(dynstr, index);
-		sadr0 := alcGetString(device, name);
-		sadr := sadr0;
+	(* copy to string list *)
+	NEW(dynstr, index);
+	sadr0 := alcGetString(device, name);
+	sadr := sadr0;
+	str := GetDevStringFromAddr(sadr);
+	index := 0;
+	WHILE (str  # NIL) & (index<10)  DO
+		COPY(str^, dynstr^[index]);
+		slen := Strings.Length(str^);
+		sadr := sadr + slen +1;
 		str := GetDevStringFromAddr(sadr);
-		index := 0;
-		WHILE (str  # NIL) & (index<10)  DO
-		       COPY(str^, dynstr^[index]);
-      			slen := Strings.Length(str^);
-			sadr := sadr + slen +1;
-			str := GetDevStringFromAddr(sadr);
-			INC(index);
-		END;
+		INC(index);
+	END;
 
 	RETURN dynstr;
 END ALCGetDeviceList;
