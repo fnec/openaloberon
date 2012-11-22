@@ -4,7 +4,7 @@ IMPORT
 	SYSTEM, Unix, Modules, Strings, KernelLog;
 
 CONST
-	libname="libopenal.so";
+	libname="libopenal.so.1";
 
 TYPE
   String256*=ARRAY 256 OF CHAR;
