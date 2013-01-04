@@ -2,7 +2,6 @@ MODULE OpenALext;
 IMPORT AL := OpenAL, SYSTEM;
 
 TYPE 
-	ADDRESS = SYSTEM.ADDRESS;
 
 (* AL_LOKI_IMA_ADPCM_format extension *)
 CONST

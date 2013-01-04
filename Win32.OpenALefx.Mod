@@ -810,5 +810,5 @@ BEGIN
 END Init;
 
 BEGIN
-Init;	
+	Init;	
 END OpenALefx.

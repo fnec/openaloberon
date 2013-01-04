@@ -2,19 +2,27 @@ OpenAL Bindings for LinuxAos and WinAos
 
 
 For LinuxAos:
-Compiler.Compile Unix.OpenAL.Mod Unix.OpenALefx.Mod Unix.OpenALext.Mod ~
+Compiler.Compile 
+	openaloberon/Unix.OpenAL.Mod 
+	openaloberon/Unix.OpenALefx.Mod 
+	openaloberon/Unix.OpenALext.Mod 
+~
 
 For Windows:
-Compiler.Compile Win32.OpenAL.Mod Win32.OpenALefx.Mod Win32.OpenALext.Mod~
+Compiler.Compile 
+	openaloberon/Win32.OpenAL.Mod 
+	openaloberon/Win32.OpenALefx.Mod 
+	openaloberon/Win32.OpenALext.Mod
+~
 
 Examples:
 
 Compiler.Compile
-OpenALinfo.Mod
-OpenALUtil.Mod
-TestOpenAL0.Mod
-TestOpenALWav.Mod 
-TestOpenALWav3.Mod
+	openaloberon/OpenALinfo.Mod
+	openaloberon/OpenALUtil.Mod
+	openaloberon/TestOpenAL0.Mod
+	openaloberon/TestOpenALWav.Mod 
+	openaloberon/TestOpenALWav3.Mod
 ~ 
 
 

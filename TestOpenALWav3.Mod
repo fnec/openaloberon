@@ -1,7 +1,7 @@
 MODULE TestOpenALWav3; (** AUTHOR "fnecati"; PURPOSE "test WAV file playing using OpenALUtil"; *)
 (* uses stripped version of WAVcodec *)
 
-IMPORT  AL:=OpenAL, SYSTEM, ALU := OpenALUtil,  KernelLog, Kernel, Commands;
+IMPORT  AL:=OpenAL, ALU := OpenALUtil,  KernelLog, Kernel, Commands;
 
 
 VAR
@@ -17,14 +17,14 @@ PROCEDURE Play*(fname: ARRAY OF CHAR);
 BEGIN 
 		
   (* Clear the source and buffers if they are not empty *)
-	 IF source # 0 THEN AL.alDeleteSources(1, SYSTEM.ADR(source)); source := 0; END;
-	 IF buffer # 0 THEN AL.alDeleteBuffers(1, SYSTEM.ADR(buffer)); buffer := 0; END;
+	 IF source # 0 THEN AL.alDeleteSources(1, ADDRESSOF(source)); source := 0; END;
+	 IF buffer # 0 THEN AL.alDeleteBuffers(1, ADDRESSOF(buffer)); buffer := 0; END;
 			
 	(* create an AL buffer object from a wav file data *)
 	buffer := ALU.LoadWavFileToBuffer(fname);	
 
 	(* create a source object *)	
-	 AL.alGenSources(1, SYSTEM.ADR(source));	
+	 AL.alGenSources(1, ADDRESSOF(source));	
 	 
 	 (* bind source to buffer *)
 	 AL.alSourcei(source, AL.AL_BUFFER, buffer);
@@ -87,10 +87,10 @@ BEGIN
 
 	
 	(* create an AL buffer object from a wav file data *)
-	buf0 := ALU.LoadWavFileToBuffer("test.wav");	
+	buf0 := ALU.LoadWavFileToBuffer("openaloberon/test.wav");	
 
 	(* create 3 source object *)	
-	 AL.alGenSources(3, SYSTEM.ADR(sources[0]));	
+	 AL.alGenSources(3, ADDRESSOF(sources[0]));	
 	 
 	 (* bind source to buffer *)
 	 AL.alSourcei(sources[0], AL.AL_BUFFER, buf0);
@@ -103,7 +103,7 @@ BEGIN
  
 
 	(* create an AL buffer object from a wav file data *)
-	buf1 := ALU.LoadWavFileToBuffer("desktoplogin.wav");	
+	buf1 := ALU.LoadWavFileToBuffer("openaloberon/desktoplogin.wav");	
 	 
 	 (* bind source to buffer *)
 	 AL.alSourcei(sources[1], AL.AL_BUFFER, buf1);
@@ -116,7 +116,7 @@ BEGIN
 
 
 	(* create an AL buffer object from a wav file data *)
-	buf2 := ALU.LoadWavFileToBuffer("s11k16bitpcm.wav");
+	buf2 := ALU.LoadWavFileToBuffer("openaloberon/s11k16bitpcm.wav");
 	 
 	 (* bind source to buffer *)
 	 AL.alSourcei(sources[2], AL.AL_BUFFER, buf2);
@@ -142,10 +142,10 @@ VAR buf0, buf2: AL.ALuint;
 BEGIN
 	
 	(* create an AL buffer object from a wav file data *)
-	buf0 := ALU.LoadWavFileToBuffer("s11k16bitpcm.wav");
+	buf0 := ALU.LoadWavFileToBuffer("openaloberon/s11k16bitpcm.wav");
 
 	(* create 3 source object *)	
-	 AL.alGenSources(3, SYSTEM.ADR(sources[0]));	
+	 AL.alGenSources(3, ADDRESSOF(sources[0]));	
 	 
 	 (* bind source 0 to buffer0 *)
 	 AL.alSourcei(sources[0], AL.AL_BUFFER, buf0);
@@ -184,9 +184,9 @@ BEGIN
 
 	(* a background source playing with looping enabled *)
 	(* create an AL buffer object from a wav file data *)
-	buf2 := ALU.LoadWavFileToBuffer("Wave4.WAV");
+	buf2 := ALU.LoadWavFileToBuffer("openaloberon/Wave4.WAV");
 	(* create a source object *)	
-	 AL.alGenSources(1, SYSTEM.ADR(s2));	
+	 AL.alGenSources(1, ADDRESSOF(s2));	
 	 
 	 (* bind source s2 to buf2 *)
 	 AL.alSourcei(s2, AL.AL_BUFFER, buf2);
@@ -207,17 +207,17 @@ BEGIN
 END TestOpenALWav3.
 
 
-TestOpenALWav3.Open "test.wav" ~
-TestOpenALWav3.Open "rugby.wav" ~
-TestOpenALWav3.Open "s11k16bitpcm.wav" ~
-TestOpenALWav3.Open "s11k8bitpcm.wav" ~
-TestOpenALWav3.Open "s11kulaw.wav" ~
- TestOpenALWav3.Open "s8k16bitpcm.wav" ~
-TestOpenALWav3.Open "s8k8bitpcm.wav" ~
-TestOpenALWav3.Open "s8kulaw.wav" ~
-TestOpenALWav3.Open "Wave4.WAV" ~
+TestOpenALWav3.Open "openaloberon/test.wav" ~
+TestOpenALWav3.Open "openaloberon/rugby.wav" ~
+TestOpenALWav3.Open "openaloberon/s11k16bitpcm.wav" ~
+TestOpenALWav3.Open "openaloberon/s11k8bitpcm.wav" ~
+TestOpenALWav3.Open "openaloberon/s11kulaw.wav" ~
+ TestOpenALWav3.Open "openaloberon/s8k16bitpcm.wav" ~
+TestOpenALWav3.Open "openaloberon/s8k8bitpcm.wav" ~
+TestOpenALWav3.Open "openaloberon/s8kulaw.wav" ~
+TestOpenALWav3.Open "openaloberon/Wave4.WAV" ~
 
-TestOpenALWav3.Open "desktoplogin.wav" ~
+TestOpenALWav3.Open "openaloberon/desktoplogin.wav" ~
 
 TestOpenALWav3.DecGain ~  TestOpenALWav3.IncGain~  
 
