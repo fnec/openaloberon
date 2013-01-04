@@ -4,15 +4,13 @@ IMPORT
 	SYSTEM, Kernel32, Modules, Strings, KernelLog;
 	
 CONST 
-		(* dowload these dlls from openal.org *)
-		(*libname="OpenAL32.dll";*)
-		libname="wrap_oal.dll";
+		(* dowload these oalibs from openal.org *)
+		(*libname="OpenAL32.oalib";*)
+		libname="wrap_oal.oalib";
 
 TYPE
   String256*=ARRAY 256 OF CHAR;
   PString256*= POINTER TO ARRAY OF String256;
-  
-  ADDRESS* = LONGINT;
   	
   ALbyte    * =  CHAR;  (* 1-byte signed *)
   ALshort   * =  INTEGER;  (* 2-byte signed *)
@@ -394,8 +392,8 @@ CONST
   AL_LOOP_POINTS_SOFT                * =     2015H;
 
 VAR
- dll : Kernel32.HMODULE; 
- dllname: ARRAY 128 OF CHAR;
+ oalib : Kernel32.HMODULE; 
+ oalibname: ARRAY 128 OF CHAR;
   
 (* Renderer State management *)	
 alEnable-: PROCEDURE { WINAPI } (capability : ALenum);
@@ -641,134 +639,134 @@ alBufferSubDataSOFT-: PROCEDURE { WINAPI } (buffer: ALuint; format: ALenum; data
 	
 PROCEDURE Init;
 BEGIN 
-		dll := Kernel32.LoadLibrary(dllname);
-		ASSERT(dll #  0, 103);
+		oalib := Kernel32.LoadLibrary(oalibname);
+		ASSERT(oalib #  0, 103);
 		
-		Kernel32.GetProcAddress(dll, "alEnable", SYSTEM.VAL(LONGINT, alEnable));
-		Kernel32.GetProcAddress(dll, "alDisable", SYSTEM.VAL(LONGINT, alDisable));
-		Kernel32.GetProcAddress(dll, "alIsEnabled", SYSTEM.VAL(LONGINT, alIsEnabled));
-		Kernel32.GetProcAddress(dll, "alGetBoolean", SYSTEM.VAL(LONGINT, alGetBoolean));
-		Kernel32.GetProcAddress(dll, "alGetInteger", SYSTEM.VAL(LONGINT, alGetInteger));
-		Kernel32.GetProcAddress(dll, "alGetFloat", SYSTEM.VAL(LONGINT, alGetFloat));
-		Kernel32.GetProcAddress(dll, "alGetDouble", SYSTEM.VAL(LONGINT, alGetDouble));
-		Kernel32.GetProcAddress(dll, "alGetBooleanv", SYSTEM.VAL(LONGINT, alGetBooleanv));
-		Kernel32.GetProcAddress(dll, "alGetIntegerv", SYSTEM.VAL(LONGINT, alGetIntegerv));
-		Kernel32.GetProcAddress(dll, "alGetFloatv", SYSTEM.VAL(LONGINT, alGetFloatv));
-		Kernel32.GetProcAddress(dll, "alGetDoublev", SYSTEM.VAL(LONGINT, alGetDoublev));
-		Kernel32.GetProcAddress(dll, "alGetString", SYSTEM.VAL(LONGINT, alGetString));
-		Kernel32.GetProcAddress(dll, "alGetError", SYSTEM.VAL(LONGINT, alGetError));
-		Kernel32.GetProcAddress(dll, "alIsExtensionPresent", SYSTEM.VAL(LONGINT, alIsExtensionPresent));
-		Kernel32.GetProcAddress(dll, "alGetProcAddress", SYSTEM.VAL(LONGINT, alGetProcAddress));
-		Kernel32.GetProcAddress(dll, "alGetEnumValue", SYSTEM.VAL(LONGINT, alGetEnumValue));
+		Kernel32.GetProcAddress(oalib, "alEnable", SYSTEM.VAL(ADDRESS, alEnable));
+		Kernel32.GetProcAddress(oalib, "alDisable", SYSTEM.VAL(ADDRESS, alDisable));
+		Kernel32.GetProcAddress(oalib, "alIsEnabled", SYSTEM.VAL(ADDRESS, alIsEnabled));
+		Kernel32.GetProcAddress(oalib, "alGetBoolean", SYSTEM.VAL(ADDRESS, alGetBoolean));
+		Kernel32.GetProcAddress(oalib, "alGetInteger", SYSTEM.VAL(ADDRESS, alGetInteger));
+		Kernel32.GetProcAddress(oalib, "alGetFloat", SYSTEM.VAL(ADDRESS, alGetFloat));
+		Kernel32.GetProcAddress(oalib, "alGetDouble", SYSTEM.VAL(ADDRESS, alGetDouble));
+		Kernel32.GetProcAddress(oalib, "alGetBooleanv", SYSTEM.VAL(ADDRESS, alGetBooleanv));
+		Kernel32.GetProcAddress(oalib, "alGetIntegerv", SYSTEM.VAL(ADDRESS, alGetIntegerv));
+		Kernel32.GetProcAddress(oalib, "alGetFloatv", SYSTEM.VAL(ADDRESS, alGetFloatv));
+		Kernel32.GetProcAddress(oalib, "alGetDoublev", SYSTEM.VAL(ADDRESS, alGetDoublev));
+		Kernel32.GetProcAddress(oalib, "alGetString", SYSTEM.VAL(ADDRESS, alGetString));
+		Kernel32.GetProcAddress(oalib, "alGetError", SYSTEM.VAL(ADDRESS, alGetError));
+		Kernel32.GetProcAddress(oalib, "alIsExtensionPresent", SYSTEM.VAL(ADDRESS, alIsExtensionPresent));
+		Kernel32.GetProcAddress(oalib, "alGetProcAddress", SYSTEM.VAL(ADDRESS, alGetProcAddress));
+		Kernel32.GetProcAddress(oalib, "alGetEnumValue", SYSTEM.VAL(ADDRESS, alGetEnumValue));
 		
-		Kernel32.GetProcAddress(dll, "alListenerf", SYSTEM.VAL(LONGINT, alListenerf));
-		Kernel32.GetProcAddress(dll, "alListener3f", SYSTEM.VAL(LONGINT, alListener3f));
-		Kernel32.GetProcAddress(dll, "alListenerfv", SYSTEM.VAL(LONGINT, alListenerfv));
-		Kernel32.GetProcAddress(dll, "alListeneri", SYSTEM.VAL(LONGINT, alListeneri));
-		Kernel32.GetProcAddress(dll, "alListener3i", SYSTEM.VAL(LONGINT, alListener3i));
-		Kernel32.GetProcAddress(dll, "alListeneriv", SYSTEM.VAL(LONGINT, alListeneriv));
+		Kernel32.GetProcAddress(oalib, "alListenerf", SYSTEM.VAL(ADDRESS, alListenerf));
+		Kernel32.GetProcAddress(oalib, "alListener3f", SYSTEM.VAL(ADDRESS, alListener3f));
+		Kernel32.GetProcAddress(oalib, "alListenerfv", SYSTEM.VAL(ADDRESS, alListenerfv));
+		Kernel32.GetProcAddress(oalib, "alListeneri", SYSTEM.VAL(ADDRESS, alListeneri));
+		Kernel32.GetProcAddress(oalib, "alListener3i", SYSTEM.VAL(ADDRESS, alListener3i));
+		Kernel32.GetProcAddress(oalib, "alListeneriv", SYSTEM.VAL(ADDRESS, alListeneriv));
 		
-		Kernel32.GetProcAddress(dll, "alGetListenerf", SYSTEM.VAL(LONGINT, alGetListenerf));
-		Kernel32.GetProcAddress(dll, "alGetListener3f", SYSTEM.VAL(LONGINT, alGetListener3f));
-		Kernel32.GetProcAddress(dll, "alGetListenerfv", SYSTEM.VAL(LONGINT, alGetListenerfv));
-		Kernel32.GetProcAddress(dll, "alGetListeneri", SYSTEM.VAL(LONGINT, alGetListeneri));
-		Kernel32.GetProcAddress(dll, "alGetListener3i", SYSTEM.VAL(LONGINT, alGetListener3i));
-		Kernel32.GetProcAddress(dll, "alGetListeneriv", SYSTEM.VAL(LONGINT, alGetListeneriv));
+		Kernel32.GetProcAddress(oalib, "alGetListenerf", SYSTEM.VAL(ADDRESS, alGetListenerf));
+		Kernel32.GetProcAddress(oalib, "alGetListener3f", SYSTEM.VAL(ADDRESS, alGetListener3f));
+		Kernel32.GetProcAddress(oalib, "alGetListenerfv", SYSTEM.VAL(ADDRESS, alGetListenerfv));
+		Kernel32.GetProcAddress(oalib, "alGetListeneri", SYSTEM.VAL(ADDRESS, alGetListeneri));
+		Kernel32.GetProcAddress(oalib, "alGetListener3i", SYSTEM.VAL(ADDRESS, alGetListener3i));
+		Kernel32.GetProcAddress(oalib, "alGetListeneriv", SYSTEM.VAL(ADDRESS, alGetListeneriv));
 								
-		Kernel32.GetProcAddress(dll, "alGenSources", SYSTEM.VAL(LONGINT, alGenSources));
-		Kernel32.GetProcAddress(dll, "alDeleteSources", SYSTEM.VAL(LONGINT, alDeleteSources));
-		Kernel32.GetProcAddress(dll, "alIsSource", SYSTEM.VAL(LONGINT, alIsSource));
-		Kernel32.GetProcAddress(dll, "alSourcei", SYSTEM.VAL(LONGINT, alSourcei));
+		Kernel32.GetProcAddress(oalib, "alGenSources", SYSTEM.VAL(ADDRESS, alGenSources));
+		Kernel32.GetProcAddress(oalib, "alDeleteSources", SYSTEM.VAL(ADDRESS, alDeleteSources));
+		Kernel32.GetProcAddress(oalib, "alIsSource", SYSTEM.VAL(ADDRESS, alIsSource));
+		Kernel32.GetProcAddress(oalib, "alSourcei", SYSTEM.VAL(ADDRESS, alSourcei));
 		
-		Kernel32.GetProcAddress(dll, "alSourcef", SYSTEM.VAL(LONGINT, alSourcef));
-		Kernel32.GetProcAddress(dll, "alSource3f", SYSTEM.VAL(LONGINT, alSource3f));
-		Kernel32.GetProcAddress(dll, "alSourcefv", SYSTEM.VAL(LONGINT, alSourcefv));
-		Kernel32.GetProcAddress(dll, "alSourcei", SYSTEM.VAL(LONGINT, alSourcei));
-		Kernel32.GetProcAddress(dll, "alSource3i", SYSTEM.VAL(LONGINT, alSource3i));
-		Kernel32.GetProcAddress(dll, "alSourceiv", SYSTEM.VAL(LONGINT, alSourceiv));
+		Kernel32.GetProcAddress(oalib, "alSourcef", SYSTEM.VAL(ADDRESS, alSourcef));
+		Kernel32.GetProcAddress(oalib, "alSource3f", SYSTEM.VAL(ADDRESS, alSource3f));
+		Kernel32.GetProcAddress(oalib, "alSourcefv", SYSTEM.VAL(ADDRESS, alSourcefv));
+		Kernel32.GetProcAddress(oalib, "alSourcei", SYSTEM.VAL(ADDRESS, alSourcei));
+		Kernel32.GetProcAddress(oalib, "alSource3i", SYSTEM.VAL(ADDRESS, alSource3i));
+		Kernel32.GetProcAddress(oalib, "alSourceiv", SYSTEM.VAL(ADDRESS, alSourceiv));
 				
-		Kernel32.GetProcAddress(dll, "alGetSourcef", SYSTEM.VAL(LONGINT, alGetSourcef));
-		Kernel32.GetProcAddress(dll, "alGetSource3f", SYSTEM.VAL(LONGINT, alGetSource3f));
-		Kernel32.GetProcAddress(dll, "alGetSourcefv", SYSTEM.VAL(LONGINT, alGetSourcefv));
-		Kernel32.GetProcAddress(dll, "alGetSourcei", SYSTEM.VAL(LONGINT, alGetSourcei));
-		Kernel32.GetProcAddress(dll, "alGetSource3i", SYSTEM.VAL(LONGINT, alGetSource3i));
-		Kernel32.GetProcAddress(dll, "alGetSourceiv", SYSTEM.VAL(LONGINT, alGetSourceiv));
+		Kernel32.GetProcAddress(oalib, "alGetSourcef", SYSTEM.VAL(ADDRESS, alGetSourcef));
+		Kernel32.GetProcAddress(oalib, "alGetSource3f", SYSTEM.VAL(ADDRESS, alGetSource3f));
+		Kernel32.GetProcAddress(oalib, "alGetSourcefv", SYSTEM.VAL(ADDRESS, alGetSourcefv));
+		Kernel32.GetProcAddress(oalib, "alGetSourcei", SYSTEM.VAL(ADDRESS, alGetSourcei));
+		Kernel32.GetProcAddress(oalib, "alGetSource3i", SYSTEM.VAL(ADDRESS, alGetSource3i));
+		Kernel32.GetProcAddress(oalib, "alGetSourceiv", SYSTEM.VAL(ADDRESS, alGetSourceiv));
 
-		Kernel32.GetProcAddress(dll, "alSourcePlayv", SYSTEM.VAL(LONGINT, alSourcePlayv));
-		Kernel32.GetProcAddress(dll, "alSourcePausev", SYSTEM.VAL(LONGINT, alSourcePausev));
-		Kernel32.GetProcAddress(dll, "alSourceStopv", SYSTEM.VAL(LONGINT, alSourceStopv));
-		Kernel32.GetProcAddress(dll, "alSourceRewindv", SYSTEM.VAL(LONGINT, alSourceRewindv));
-		Kernel32.GetProcAddress(dll, "alSourcePlay", SYSTEM.VAL(LONGINT, alSourcePlay));
-		Kernel32.GetProcAddress(dll, "alSourcePause", SYSTEM.VAL(LONGINT, alSourcePause));
-		Kernel32.GetProcAddress(dll, "alSourceStop", SYSTEM.VAL(LONGINT, alSourceStop));
-		Kernel32.GetProcAddress(dll, "alSourceRewind", SYSTEM.VAL(LONGINT, alSourceRewind));
+		Kernel32.GetProcAddress(oalib, "alSourcePlayv", SYSTEM.VAL(ADDRESS, alSourcePlayv));
+		Kernel32.GetProcAddress(oalib, "alSourcePausev", SYSTEM.VAL(ADDRESS, alSourcePausev));
+		Kernel32.GetProcAddress(oalib, "alSourceStopv", SYSTEM.VAL(ADDRESS, alSourceStopv));
+		Kernel32.GetProcAddress(oalib, "alSourceRewindv", SYSTEM.VAL(ADDRESS, alSourceRewindv));
+		Kernel32.GetProcAddress(oalib, "alSourcePlay", SYSTEM.VAL(ADDRESS, alSourcePlay));
+		Kernel32.GetProcAddress(oalib, "alSourcePause", SYSTEM.VAL(ADDRESS, alSourcePause));
+		Kernel32.GetProcAddress(oalib, "alSourceStop", SYSTEM.VAL(ADDRESS, alSourceStop));
+		Kernel32.GetProcAddress(oalib, "alSourceRewind", SYSTEM.VAL(ADDRESS, alSourceRewind));
 		
-		Kernel32.GetProcAddress(dll, "alGenBuffers", SYSTEM.VAL(LONGINT, alGenBuffers));
-		Kernel32.GetProcAddress(dll, "alDeleteBuffers", SYSTEM.VAL(LONGINT, alDeleteBuffers));
-		Kernel32.GetProcAddress(dll, "alIsBuffer", SYSTEM.VAL(LONGINT, alIsBuffer));
-		Kernel32.GetProcAddress(dll, "alBufferData", SYSTEM.VAL(LONGINT, alBufferData));
+		Kernel32.GetProcAddress(oalib, "alGenBuffers", SYSTEM.VAL(ADDRESS, alGenBuffers));
+		Kernel32.GetProcAddress(oalib, "alDeleteBuffers", SYSTEM.VAL(ADDRESS, alDeleteBuffers));
+		Kernel32.GetProcAddress(oalib, "alIsBuffer", SYSTEM.VAL(ADDRESS, alIsBuffer));
+		Kernel32.GetProcAddress(oalib, "alBufferData", SYSTEM.VAL(ADDRESS, alBufferData));
 
-		Kernel32.GetProcAddress(dll, "alBufferf", SYSTEM.VAL(LONGINT, alBufferf));
-		Kernel32.GetProcAddress(dll, "alBuffer3f", SYSTEM.VAL(LONGINT, alBuffer3f));
-		Kernel32.GetProcAddress(dll, "alBufferfv", SYSTEM.VAL(LONGINT, alBufferfv));
-		Kernel32.GetProcAddress(dll, "alBufferi", SYSTEM.VAL(LONGINT, alBufferi));
-		Kernel32.GetProcAddress(dll, "alBuffer3i", SYSTEM.VAL(LONGINT, alBuffer3i));
-		Kernel32.GetProcAddress(dll, "alBufferiv", SYSTEM.VAL(LONGINT, alBufferiv));
+		Kernel32.GetProcAddress(oalib, "alBufferf", SYSTEM.VAL(ADDRESS, alBufferf));
+		Kernel32.GetProcAddress(oalib, "alBuffer3f", SYSTEM.VAL(ADDRESS, alBuffer3f));
+		Kernel32.GetProcAddress(oalib, "alBufferfv", SYSTEM.VAL(ADDRESS, alBufferfv));
+		Kernel32.GetProcAddress(oalib, "alBufferi", SYSTEM.VAL(ADDRESS, alBufferi));
+		Kernel32.GetProcAddress(oalib, "alBuffer3i", SYSTEM.VAL(ADDRESS, alBuffer3i));
+		Kernel32.GetProcAddress(oalib, "alBufferiv", SYSTEM.VAL(ADDRESS, alBufferiv));
 		
-		Kernel32.GetProcAddress(dll, "alGetBufferf", SYSTEM.VAL(LONGINT, alGetBufferf));
-		Kernel32.GetProcAddress(dll, "alGetBuffer3f", SYSTEM.VAL(LONGINT, alGetBuffer3f));
-		Kernel32.GetProcAddress(dll, "alGetBufferfv", SYSTEM.VAL(LONGINT, alGetBufferfv));
-		Kernel32.GetProcAddress(dll, "alGetBufferi", SYSTEM.VAL(LONGINT, alGetBufferi));
-		Kernel32.GetProcAddress(dll, "alGetBuffer3i", SYSTEM.VAL(LONGINT, alGetBuffer3i));
-		Kernel32.GetProcAddress(dll, "alGetBufferiv", SYSTEM.VAL(LONGINT, alGetBufferiv));
+		Kernel32.GetProcAddress(oalib, "alGetBufferf", SYSTEM.VAL(ADDRESS, alGetBufferf));
+		Kernel32.GetProcAddress(oalib, "alGetBuffer3f", SYSTEM.VAL(ADDRESS, alGetBuffer3f));
+		Kernel32.GetProcAddress(oalib, "alGetBufferfv", SYSTEM.VAL(ADDRESS, alGetBufferfv));
+		Kernel32.GetProcAddress(oalib, "alGetBufferi", SYSTEM.VAL(ADDRESS, alGetBufferi));
+		Kernel32.GetProcAddress(oalib, "alGetBuffer3i", SYSTEM.VAL(ADDRESS, alGetBuffer3i));
+		Kernel32.GetProcAddress(oalib, "alGetBufferiv", SYSTEM.VAL(ADDRESS, alGetBufferiv));
 
-		Kernel32.GetProcAddress(dll, "alSourceQueueBuffers", SYSTEM.VAL(LONGINT, alSourceQueueBuffers));
-		Kernel32.GetProcAddress(dll, "alSourceUnqueueBuffers", SYSTEM.VAL(LONGINT, alSourceUnqueueBuffers));
-		Kernel32.GetProcAddress(dll, "alDistanceModel", SYSTEM.VAL(LONGINT, alDistanceModel));
-		Kernel32.GetProcAddress(dll, "alDopplerFactor", SYSTEM.VAL(LONGINT, alDopplerFactor));
-		Kernel32.GetProcAddress(dll, "alSpeedOfSound", SYSTEM.VAL(LONGINT, alSpeedOfSound));
-		Kernel32.GetProcAddress(dll, "alDopplerVelocity", SYSTEM.VAL(LONGINT, alDopplerVelocity));
+		Kernel32.GetProcAddress(oalib, "alSourceQueueBuffers", SYSTEM.VAL(ADDRESS, alSourceQueueBuffers));
+		Kernel32.GetProcAddress(oalib, "alSourceUnqueueBuffers", SYSTEM.VAL(ADDRESS, alSourceUnqueueBuffers));
+		Kernel32.GetProcAddress(oalib, "alDistanceModel", SYSTEM.VAL(ADDRESS, alDistanceModel));
+		Kernel32.GetProcAddress(oalib, "alDopplerFactor", SYSTEM.VAL(ADDRESS, alDopplerFactor));
+		Kernel32.GetProcAddress(oalib, "alSpeedOfSound", SYSTEM.VAL(ADDRESS, alSpeedOfSound));
+		Kernel32.GetProcAddress(oalib, "alDopplerVelocity", SYSTEM.VAL(ADDRESS, alDopplerVelocity));
 		
 		
-		Kernel32.GetProcAddress(dll, "alcOpenDevice", SYSTEM.VAL(LONGINT, alcOpenDevice));
-		Kernel32.GetProcAddress(dll, "alcCloseDevice", SYSTEM.VAL(LONGINT, alcCloseDevice));
-		Kernel32.GetProcAddress(dll, "alcCreateContext", SYSTEM.VAL(LONGINT, alcCreateContext));
-		Kernel32.GetProcAddress(dll, "alcMakeContextCurrent", SYSTEM.VAL(LONGINT, alcMakeContextCurrent));
-		Kernel32.GetProcAddress(dll, "alcProcessContext", SYSTEM.VAL(LONGINT, alcProcessContext));
-		Kernel32.GetProcAddress(dll, "alcGetCurrentContext", SYSTEM.VAL(LONGINT, alcGetCurrentContext));
-		Kernel32.GetProcAddress(dll, "alcGetContextsDevice", SYSTEM.VAL(LONGINT, alcGetContextsDevice));
-		Kernel32.GetProcAddress(dll, "alcSuspendContext", SYSTEM.VAL(LONGINT, alcSuspendContext));
-		Kernel32.GetProcAddress(dll, "alcDestroyContext", SYSTEM.VAL(LONGINT, alcDestroyContext));
-		Kernel32.GetProcAddress(dll, "alcGetError", SYSTEM.VAL(LONGINT, alcGetError));
-		Kernel32.GetProcAddress(dll, "alcGetString", SYSTEM.VAL(LONGINT, alcGetString));
-		Kernel32.GetProcAddress(dll, "alcGetIntegerv", SYSTEM.VAL(LONGINT, alcGetIntegerv));
+		Kernel32.GetProcAddress(oalib, "alcOpenDevice", SYSTEM.VAL(ADDRESS, alcOpenDevice));
+		Kernel32.GetProcAddress(oalib, "alcCloseDevice", SYSTEM.VAL(ADDRESS, alcCloseDevice));
+		Kernel32.GetProcAddress(oalib, "alcCreateContext", SYSTEM.VAL(ADDRESS, alcCreateContext));
+		Kernel32.GetProcAddress(oalib, "alcMakeContextCurrent", SYSTEM.VAL(ADDRESS, alcMakeContextCurrent));
+		Kernel32.GetProcAddress(oalib, "alcProcessContext", SYSTEM.VAL(ADDRESS, alcProcessContext));
+		Kernel32.GetProcAddress(oalib, "alcGetCurrentContext", SYSTEM.VAL(ADDRESS, alcGetCurrentContext));
+		Kernel32.GetProcAddress(oalib, "alcGetContextsDevice", SYSTEM.VAL(ADDRESS, alcGetContextsDevice));
+		Kernel32.GetProcAddress(oalib, "alcSuspendContext", SYSTEM.VAL(ADDRESS, alcSuspendContext));
+		Kernel32.GetProcAddress(oalib, "alcDestroyContext", SYSTEM.VAL(ADDRESS, alcDestroyContext));
+		Kernel32.GetProcAddress(oalib, "alcGetError", SYSTEM.VAL(ADDRESS, alcGetError));
+		Kernel32.GetProcAddress(oalib, "alcGetString", SYSTEM.VAL(ADDRESS, alcGetString));
+		Kernel32.GetProcAddress(oalib, "alcGetIntegerv", SYSTEM.VAL(ADDRESS, alcGetIntegerv));
 
-		Kernel32.GetProcAddress(dll, "alcIsExtensionPresent", SYSTEM.VAL(LONGINT, alcIsExtensionPresent));
-		Kernel32.GetProcAddress(dll, "alcGetProcAddress", SYSTEM.VAL(LONGINT, alcGetProcAddress));
-		Kernel32.GetProcAddress(dll, "alcGetEnumValue", SYSTEM.VAL(LONGINT, alcGetEnumValue));
+		Kernel32.GetProcAddress(oalib, "alcIsExtensionPresent", SYSTEM.VAL(ADDRESS, alcIsExtensionPresent));
+		Kernel32.GetProcAddress(oalib, "alcGetProcAddress", SYSTEM.VAL(ADDRESS, alcGetProcAddress));
+		Kernel32.GetProcAddress(oalib, "alcGetEnumValue", SYSTEM.VAL(ADDRESS, alcGetEnumValue));
 
 		
-		Kernel32.GetProcAddress(dll, "alcCaptureOpenDevice", SYSTEM.VAL(LONGINT, alcCaptureOpenDevice));
-		Kernel32.GetProcAddress(dll, "alcCaptureCloseDevice", SYSTEM.VAL(LONGINT, alcCaptureCloseDevice));
-		Kernel32.GetProcAddress(dll, "alcCaptureStart", SYSTEM.VAL(LONGINT, alcCaptureStart));
-		Kernel32.GetProcAddress(dll, "alcCaptureStop", SYSTEM.VAL(LONGINT, alcCaptureStop));
-		Kernel32.GetProcAddress(dll, "alcCaptureSamples", SYSTEM.VAL(LONGINT, alcCaptureSamples));
+		Kernel32.GetProcAddress(oalib, "alcCaptureOpenDevice", SYSTEM.VAL(ADDRESS, alcCaptureOpenDevice));
+		Kernel32.GetProcAddress(oalib, "alcCaptureCloseDevice", SYSTEM.VAL(ADDRESS, alcCaptureCloseDevice));
+		Kernel32.GetProcAddress(oalib, "alcCaptureStart", SYSTEM.VAL(ADDRESS, alcCaptureStart));
+		Kernel32.GetProcAddress(oalib, "alcCaptureStop", SYSTEM.VAL(ADDRESS, alcCaptureStop));
+		Kernel32.GetProcAddress(oalib, "alcCaptureSamples", SYSTEM.VAL(ADDRESS, alcCaptureSamples));
 
 (*
 		(* extensions *)
-		Kernel32.GetProcAddress(dll, "alBufferDataStatic", SYSTEM.VAL(LONGINT, alBufferDataStatic));
-		Kernel32.GetProcAddress(dll, "alcSetThreadContext", SYSTEM.VAL(LONGINT, alcSetThreadContext));
-		Kernel32.GetProcAddress(dll, "alcGetThreadContext", SYSTEM.VAL(LONGINT, alcGetThreadContext));
-		Kernel32.GetProcAddress(dll, "alBufferSubDataSOFT", SYSTEM.VAL(LONGINT, alBufferSubDataSOFT));		
+		Kernel32.GetProcAddress(oalib, "alBufferDataStatic", SYSTEM.VAL(ADDRESS, alBufferDataStatic));
+		Kernel32.GetProcAddress(oalib, "alcSetThreadContext", SYSTEM.VAL(ADDRESS, alcSetThreadContext));
+		Kernel32.GetProcAddress(oalib, "alcGetThreadContext", SYSTEM.VAL(ADDRESS, alcGetThreadContext));
+		Kernel32.GetProcAddress(oalib, "alBufferSubDataSOFT", SYSTEM.VAL(ADDRESS, alBufferSubDataSOFT));		
 *)
 END Init;
 
 PROCEDURE OnClose;
 VAR res: LONGINT;
 BEGIN 
-   	 IF dll # Kernel32.NULL THEN
-   	 	res := Kernel32.FreeLibrary(dll);
-	 	KernelLog.String(dllname); KernelLog.String(" library unloaded.."); KernelLog.Ln;
+   	 IF oalib # Kernel32.NULL THEN
+   	 	res := Kernel32.FreeLibrary(oalib);
+	 	KernelLog.String(oalibname); KernelLog.String(" library unloaded.."); KernelLog.Ln;
   	END;	 
 END OnClose;
 
@@ -892,7 +890,7 @@ BEGIN
 END ALCGetDeviceList;
 	
 BEGIN
-	COPY(libname, dllname);
+	COPY(libname, oalibname);
 	Init;
 	Modules.InstallTermHandler(OnClose) ;
 END OpenAL.
