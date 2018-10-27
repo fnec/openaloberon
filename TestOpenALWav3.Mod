@@ -228,7 +228,7 @@ TestOpenALWav3.Do1 ~
 
 TestOpenALWav3.Do2 ~ 
 
-SystemTools.FreeDownTo  OpenAL~ 
+System.FreeDownTo  OpenAL~ 
 
-SystemTools.Free TestOpenALWav3~ 
+System.Free TestOpenALWav3~ 
 

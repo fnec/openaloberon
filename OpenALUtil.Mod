@@ -1,5 +1,5 @@
 MODULE OpenALUtil; (** AUTHOR "fnecati"; PURPOSE "OpenAL utilities"; *)
-IMPORT  AL:=OpenAL, SYSTEM, KernelLog, SoundDevices, Codecs, Streams, Files, Modules, Strings;
+IMPORT  AL:=OpenAL, KernelLog, SoundDevices, Codecs, Streams, Files, Modules, Strings;
 
 (* todo: 
 	can be wrapped as oberon objects, if you like; 
@@ -9,12 +9,12 @@ IMPORT  AL:=OpenAL, SYSTEM, KernelLog, SoundDevices, Codecs, Streams, Files, Mod
 CONST 
 	debug = FALSE;
 	
-	openalPlayFile ="openalplay.ini"; (* configuration file for available list of play playdevices *) 
-	openalCapFile ="openalcap.ini";    (* configuration file for available list of capture playdevices *) 
+	openalPlayFile* ="openalplay.ini"; (* configuration file for available list of play playdevices *) 
+	openalCapFile* ="openalcap.ini";    (* configuration file for available list of capture playdevices *) 
 	
 VAR
-	playdevice, capturedevice: AL.ALCdevice;
-	playcontext , capturecontext : AL.ALCcontext;
+	playdevice-, capturedevice-: AL.ALCdevice;
+	playcontext- , capturecontext-  : AL.ALCcontext;
 	
 	sbuffer  : SoundDevices.Buffer;	
 	wavdecoder : Codecs.AudioDecoder;
@@ -42,11 +42,11 @@ END LoadDeviceName;
 (** clear and write al device error *)	
 PROCEDURE ALWriteError*(CONST tit: ARRAY OF CHAR);
 VAR s: Strings.String;
-	err: AL.ALuint;
+	err: AL.ALenum;
 BEGIN
 	err := AL.alGetError();
 	IF ~ debug THEN RETURN END;
-	s := AL.ALGetString(err);
+	s := AL.alGetString(err);
 	IF s # NIL THEN
 		KernelLog.String(tit);  KernelLog.String(s^); KernelLog.Ln; 
 	END;
@@ -55,11 +55,11 @@ END ALWriteError;
 (** clear and write alc device error *)
 PROCEDURE ALCWriteError*(d: AL.ALCdevice; CONST tit: ARRAY OF CHAR);
 VAR s: Strings.String;
-	err: AL.ALuint;
+	err: AL.ALenum;
 BEGIN
 	err := AL.alcGetError(d);
 	IF ~ debug THEN RETURN END;
-	s := AL.ALCGetString(d, err);
+	s := AL.alcGetString(d, err);
 	IF s # NIL THEN
 		KernelLog.String(tit); KernelLog.String(s^); KernelLog.Ln; 
 	END;
@@ -69,13 +69,13 @@ END ALCWriteError;
 (** load wave file data to the created AL buffer buf *)
 PROCEDURE LoadWavFileToBuffer*(CONST fname: ARRAY OF CHAR): AL.ALuint;
 VAR
-	fmt: AL.ALuint; 
+	fmt: AL.ALenum; 
 	dres: LONGINT;
 	file: Files.File;
 	in: Files.Reader;
 	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : LONGINT;
 	buffer : AL.ALuint;
-	err: LONGINT;
+	err: AL.ALenum;
 BEGIN 
 	
 	file := Files.Old(fname);
@@ -170,14 +170,16 @@ BEGIN
 	AL.alListenerfv(AL.AL_VELOCITY, ADDRESSOF(vel[0]));
 END SetListenerVelocityv;
 
-(** set velocity of the listener to vel vector *)
-PROCEDURE SetListenerOrientation*(x, y,  z: REAL);
+(** set orientation of the listener *)
+PROCEDURE SetListenerOrientation*(fwdx, fwdy,  fwdz: REAL; upx, upy, upz: REAL);
+VAR orient: ARRAY 6 OF REAL;
 BEGIN
-	AL.alListener3f(AL.AL_ORIENTATION, x, y, z);
+	orient := [fwdx, fwdy,  fwdz, upx, upy, upz];
+	AL.alListenerfv(AL.AL_ORIENTATION, ADDRESSOF(orient[0]));
 END SetListenerOrientation;
 
-(** set orientation of the listener to dir vector *)
-PROCEDURE SetListenerOrientationv*(dir: ARRAY 3 OF REAL);
+(** set orientation of the listener [3 fwd, 3 up] *)
+PROCEDURE SetListenerOrientationv*(dir: ARRAY 6 OF REAL);
 BEGIN
 	AL.alListenerfv(AL.AL_ORIENTATION, ADDRESSOF(dir[0]));
 END SetListenerOrientationv;
@@ -186,11 +188,11 @@ END SetListenerOrientationv;
 (** set source to looping mode *)
 PROCEDURE SetLoop*(source: AL.ALuint; loop: BOOLEAN);
 BEGIN
-IF loop THEN
-	AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE); 
-ELSE
-	AL.alSourcei(source, AL.AL_LOOPING, AL.AL_FALSE); 
-END
+	IF loop THEN
+		AL.alSourcei(source, AL.AL_LOOPING, AL.AL_TRUE); 
+	ELSE
+		AL.alSourcei(source, AL.AL_LOOPING, AL.AL_FALSE); 
+	END
 END SetLoop;
 
 (** set position of the source to x,y,z*)
@@ -208,24 +210,18 @@ END SetSourcePositionv;
 
 (** set gain of source *)
 PROCEDURE SetGain*(source: AL.ALuint; gain: AL.ALfloat);
-VAR g: AL.ALfloat;
 BEGIN
-	g := gain;
-	IF g > 1.0 THEN g := 1.0;
-	ELSIF g < 0 THEN g := 0.0;
-	END;
-	AL.alSourcef(source, AL.AL_GAIN, g);
+	IF gain < 0 THEN gain := 0.0; END;
+	AL.alSourcef(source, AL.AL_GAIN, gain);
 END SetGain;
 
 (** set pitch of the source *)
 PROCEDURE SetPitch*(source: AL.ALuint; pitch: AL.ALfloat);
-VAR p: AL.ALfloat;
 BEGIN
-	p := pitch;
-	IF p > 5.0 THEN p := 5.0;
-	ELSIF  p< 0 THEN p := 0.0;
+	IF pitch > 2.0 THEN pitch := 2.0;
+	ELSIF  pitch< 0.5 THEN pitch := 0.5;
 	END;
-	AL.alSourcef(source, AL.AL_PITCH, p);
+	AL.alSourcef(source, AL.AL_PITCH, pitch);
 END SetPitch;
 
 (** play the source *)
@@ -308,7 +304,7 @@ BEGIN
 	ALCWriteError(playdevice, "Device Open Error: ");	
 	ASSERT(playdevice # 0, 200);
 	
-	str := AL.ALCGetString(playdevice,   AL.ALC_DEVICE_SPECIFIER);
+	str := AL.alcGetString(playdevice,   AL.ALC_DEVICE_SPECIFIER);
 		ALCWriteError(playdevice, "Device Specifier Error: ");	
 		KernelLog.String("ALC_DEVICE_SPECIFIER: "); KernelLog.String(str^); KernelLog.Ln; 
 		
@@ -337,15 +333,16 @@ VAR
  	res : AL.ALboolean;
 BEGIN 
 	IF playdevice = 0 THEN 
-		KernelLog.String("Device already Closed" ); KernelLog.Ln;
+		KernelLog.String("Play Device already Closed" ); KernelLog.Ln;
 		RETURN 
 	END;
  
 	res := AL.alcMakeContextCurrent(0);
-	AL.alcDestroyContext(playcontext);  
+	AL.alcDestroyContext(playcontext); 
+	playcontext := 0;
 	res := AL.alcCloseDevice(playdevice);
-	
-	KernelLog.String("Device Closed. "); KernelLog.Ln; 		
+	playdevice := 0;
+	KernelLog.String("Play Device Closed. "); KernelLog.Ln; 		
 END ClosePlayDevice;
 
 (* not tested, open capture device, read from configuration file *)
@@ -361,14 +358,14 @@ BEGIN
 	capturedevice := AL.alcCaptureOpenDevice(s, freq, fmt, samples); (* use default *)
 	ASSERT(capturedevice # 0, 202);
 	
-	str := AL.ALCGetString(capturedevice,   AL.ALC_CAPTURE_DEVICE_SPECIFIER);
+	str := AL.alcGetString(capturedevice,   AL.ALC_CAPTURE_DEVICE_SPECIFIER);
 	KernelLog.String("ALC_CAPTURE_DEVICE_SPECIFIER = "); KernelLog.String(str^); KernelLog.Ln; 
 
 	KernelLog.String("0-- alcGetError= "); KernelLog.Hex(AL.alcGetError(capturedevice), 4); KernelLog.Ln; 
-	capturecontext := AL.alcCreateContext(capturedevice, 0);
+(*	capturecontext := AL.alcCreateContext(capturedevice, 0);
 	KernelLog.String("01-- alcGetError= "); KernelLog.Hex(AL.alcGetError(capturedevice), 4); KernelLog.Ln; 
 	res := AL.alcMakeContextCurrent(capturecontext);
-			
+*)			
 	KernelLog.String("Capture Device Opened" ); KernelLog.Ln; 	
 END OpenCaptureDevice;
 
@@ -382,22 +379,24 @@ BEGIN
 		RETURN 
 	END;
  
- 	AL.alcDestroyContext(capturecontext);  
+ 	AL.alcDestroyContext(capturecontext); 
+ 	capturecontext := 0; 
  	res := AL.alcCaptureCloseDevice(capturedevice);
-	 
-  KernelLog.String("Capture Device Closed. "); KernelLog.Ln; 		
+	capturedevice := 0; 
+	KernelLog.String("Capture Device Closed. "); KernelLog.Ln; 		
 END CloseCaptureDevice;
 
 
 PROCEDURE OnClose;
 BEGIN 
-IF playdevice # 0 THEN ClosePlayDevice; END;
-IF capturedevice # 0 THEN CloseCaptureDevice; END;
+	IF playdevice # 0 THEN ClosePlayDevice; END;
+	IF capturedevice # 0 THEN CloseCaptureDevice; END;
 END OnClose;
 
 BEGIN
 	(* load sound decoder *)
-		NEW(wavdecoder);
-		OpenPlayDevice;
-		Modules.InstallTermHandler(OnClose) ;
+	NEW(wavdecoder);
+	OpenPlayDevice;
+	Modules.InstallTermHandler(OnClose) ;
 END OpenALUtil.
+

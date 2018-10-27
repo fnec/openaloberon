@@ -1,16 +1,13 @@
 MODULE TestOpenAL0; (** AUTHOR ""; PURPOSE ""; *)
 
-IMPORT  AL:=OpenAL, ALU := OpenALUtil, SYSTEM, Math, Strings, Kernel, KernelLog;
+IMPORT  AL:=OpenAL, ALU := OpenALUtil, Math, Kernel, KernelLog;
 
 VAR
 	 timer: Kernel.Timer;
-	device : AL.ALCdevice;
-	context : AL.ALCcontext;
-
 
 PROCEDURE Play1*;
 VAR
-  buffer : AL.ALuint;
+  buffer : AL.ALint;
   source : AL.ALuint;
  test : POINTER TO ARRAY OF CHAR;
   z : LONGINT;
@@ -52,14 +49,14 @@ END Play1;
 PROCEDURE Play2*;
 CONST  D2R = 0.0174532925;
 VAR
-	buffer : AL.ALuint;
+	buffer : AL.ALint;
 	source : AL.ALuint;
 	data: POINTER TO ARRAY OF CHAR;
 	i : LONGINT;
 	x: REAL;
 	samples: LONGINT;
 	frequency: LONGINT;
-	size,  freq: AL.ALsizei;
+	size,  freq: LONGINT;
 
 	srcPos, lstPos: ARRAY [3] OF AL.ALfloat;
 	
@@ -131,7 +128,7 @@ END Play2;
 (* 16 bit data *)
 PROCEDURE Play3*;
 VAR
-	buffer : AL.ALuint;
+	buffer : AL.ALint;
 	source : AL.ALuint;
 
 	test : POINTER TO ARRAY OF INTEGER; (* for 16 bits data*)
@@ -202,4 +199,4 @@ TestOpenAL0.Play3 ~
 
 TestOpenAL0.Do ~
 
-SystemTools.Free TestOpenAL0~ 
+System.Free TestOpenAL0~ 

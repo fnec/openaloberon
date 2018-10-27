@@ -1,11 +1,13 @@
 MODULE OpenALinfo; (** AUTHOR "fnecati"; PURPOSE "show OpenAL device infos"; *)
+(* adapted from openal-soft/utils/openal-info.c *)
 
-IMPORT  AL:=OpenAL, EFX:=OpenALefx, SYSTEM, Files, Strings,  KernelLog;
+IMPORT  Commands, AL:=OpenAL, EFX:=OpenALefx, EXT:=OpenALext, Files, Strings,  KernelLog;
+
 CONST
 	openalPlayFile ="openalplay.ini"; (* configuration file for available list of play devices *) 
 	openalCapFile ="openalcap.ini"    (* configuration file for available list of capture devices *) 
 	
-TYPE PString256 = AL.PString256;
+TYPE StringArray = AL.StringArray;
 
 VAR 
 	str: Strings.String;
@@ -14,85 +16,161 @@ VAR
 	context : AL.ALCcontext;
 	res: AL.ALboolean;
 	
-PROCEDURE checkALErrors(linenum: LONGINT): AL.ALenum;
+PROCEDURE checkALErrors(linenum=0: LONGINT): AL.ALenum;
 BEGIN
-     err := AL.alGetError();
-    IF (err # AL.AL_NO_ERROR) THEN
-       KernelLog.String("OpenAL Error: ");
-       str := AL.ALGetString(err);
-       KernelLog.String(str^); KernelLog.String(",  @ "); KernelLog.Int(linenum, 0); KernelLog.Ln; 
-    END;    
-    RETURN err;
+	err := AL.alGetError();
+	IF (err # AL.AL_NO_ERROR) THEN
+		KernelLog.String("OpenAL Error: ");
+		str := AL.alGetString(err);
+		KernelLog.String(str^); KernelLog.String(", "); KernelLog.Hex(err, -4); 
+		KernelLog.String(" @ "); KernelLog.Int(linenum, 0); KernelLog.Ln; 
+	END;    
+	RETURN err;
 END checkALErrors;
 
-
-PROCEDURE  checkALCErrors( device: AL.ALCdevice): AL.ALCenum;
+PROCEDURE  checkALCErrors( device: AL.ALCdevice; linenum=0: LONGINT): AL.ALCenum;
 BEGIN
-     err := AL.alcGetError(device);
-    IF err # AL.ALC_NO_ERROR THEN
-       KernelLog.String("ALC Error: ");
-       str := AL.ALCGetString(device, err);
-       KernelLog.String(str^);  KernelLog.Ln; 
-    END;          
-    RETURN err;
+	err := AL.alcGetError(device);
+	IF err # AL.ALC_NO_ERROR THEN
+		KernelLog.String("ALC Error: ");
+		str := AL.alcGetString(device, err);
+		KernelLog.String(str^);  KernelLog.String(", "); KernelLog.Hex(err, -4); 
+		KernelLog.String(" @ "); KernelLog.Int(linenum, 0); KernelLog.Ln; 
+	END;          
+	RETURN err;
 END checkALCErrors;     
 
 PROCEDURE printALCInfo(device: AL.ALCdevice );
 VAR
-    major, minor: AL.ALCint;    
+	major, minor: AL.ALCint;
+	devname: Strings.String;
 BEGIN
-    AL.alcGetIntegerv(device, AL.ALC_MAJOR_VERSION, 1, ADDRESSOF(major));
-    AL.alcGetIntegerv(device, AL.ALC_MINOR_VERSION, 1, ADDRESSOF(minor));
-    IF (checkALCErrors(device) = AL.ALC_NO_ERROR) THEN
-        KernelLog.String("ALC version: "); KernelLog.Int(major, 0); KernelLog.String(".");  KernelLog.Int(minor, 0); KernelLog.Ln; 
-    END;
+	IF device # NIL THEN
+		KernelLog.Ln; 
+		IF AL.alcIsExtensionPresent(device, "ALC_ENUMERATE_ALL_EXT") THEN
+			devname := AL.alcGetString(device, AL.ALC_ALL_DEVICES_SPECIFIER);			
+		END;
+		IF checkALCErrors(device) # AL.ALC_NO_ERROR THEN
+			devname := AL.alcGetString(device, AL.ALC_DEVICE_SPECIFIER);
+		END;
+		KernelLog.String("** Info for device ");  KernelLog.String(devname^); 
+		KernelLog.String(" **"); KernelLog.Ln; 
+	END;
+	
+	AL.alcGetIntegerv(device, AL.ALC_MAJOR_VERSION, 1, ADDRESSOF(major));
+	AL.alcGetIntegerv(device, AL.ALC_MINOR_VERSION, 1, ADDRESSOF(minor));
+	IF (checkALCErrors(device) = AL.ALC_NO_ERROR) THEN
+		KernelLog.String("ALC version: "); KernelLog.Int(major, 0); KernelLog.String(".");  KernelLog.Int(minor, 0); KernelLog.Ln; 
+	END;
         
-    IF device # 0 THEN   
+    IF device # NIL THEN   
         KernelLog.String("ALC extensions: "); 
-        str := AL.ALCGetString(device, AL.ALC_EXTENSIONS);
+        str := AL.alcGetString(device, AL.ALC_EXTENSIONS);
         KernelLog.String(str^); KernelLog.Ln; 
         err := checkALCErrors(device);
    END;
    KernelLog.Ln; 
 END printALCInfo;
 
+PROCEDURE printHRTFInfo(device: AL.ALCdevice );
+VAR numhrtf, i: AL.ALCint;
+	alcGetStringiSOFT: EXT.TalcGetStringiSOFT;
+	name : Strings.String;
+	nameadr: ADDRESS;
+	er: AL.ALCenum;
+BEGIN
+	IF ~AL.alcIsExtensionPresent(device, "ALC_SOFT_HRTF") THEN
+		KernelLog.String("HRTF extension not available"); KernelLog.Ln; 
+		RETURN;
+	END;
+	
+	AL.alcGetProcAddress(device, "alcGetStringiSOFT", ADDRESSOF(alcGetStringiSOFT));
+	AL.alcGetIntegerv(device, EXT.ALC_NUM_HRTF_SPECIFIERS_SOFT, 1, ADDRESSOF(numhrtf));
+	IF numhrtf = 0 THEN
+		KernelLog.String("No HRTFs found"); KernelLog.Ln; 
+	ELSE
+		KernelLog.String("Available HRTFs:"); KernelLog.Ln; 
+		FOR i:=0 TO numhrtf-1 DO
+			nameadr := alcGetStringiSOFT(device, EXT.ALC_HRTF_SPECIFIER_SOFT, i);
+			name := AL.GetStringFromAddr(nameadr);
+			KernelLog.String("          "); KernelLog.String(name^); KernelLog.Ln; 
+		END;	
+	END;
+	er := checkALCErrors(device);
+END printHRTFInfo;
+
 PROCEDURE printALInfo();
 BEGIN
-
-    KernelLog.String("OpenAL vendor string: ");  str := AL.ALGetString(AL.AL_VENDOR); KernelLog.String(str^); KernelLog.Ln; 
-     KernelLog.String("OpenAL renderer string: "); str := AL.ALGetString(AL.AL_RENDERER); KernelLog.String(str^); KernelLog.Ln; 
-     KernelLog.String("OpenAL version string: "); str := AL.ALGetString(AL.AL_VERSION); KernelLog.String(str^); KernelLog.Ln; 
-     KernelLog.String("OpenAL extensions:  "); str := AL.ALGetString(AL.AL_EXTENSIONS); KernelLog.String(str^); KernelLog.Ln; 
-     
-    err := checkALErrors(1);
-    KernelLog.Ln; 
+	KernelLog.String("OpenAL vendor string: ");  str := AL.alGetString(AL.AL_VENDOR); KernelLog.String(str^); KernelLog.Ln;
+     KernelLog.String("OpenAL renderer string: "); str := AL.alGetString(AL.AL_RENDERER); KernelLog.String(str^); KernelLog.Ln;
+     KernelLog.String("OpenAL version string: "); str := AL.alGetString(AL.AL_VERSION); KernelLog.String(str^); KernelLog.Ln;
+     KernelLog.String("OpenAL extensions:  "); str := AL.alGetString(AL.AL_EXTENSIONS); KernelLog.String(str^); KernelLog.Ln;     
+	err := checkALErrors();
+	KernelLog.Ln; 
 END printALInfo;
 
+PROCEDURE printResamplerInfo;
+VAR
+    num_resamplers, def_resampler: AL.ALint;
+    i: LONGINT;
+    name: Strings.String;
+BEGIN
+    IF ~AL.alIsExtensionPresent("AL_SOFT_source_resampler") THEN
+        KernelLog.String("Resampler info not available"); KernelLog.Ln;
+        RETURN
+    END;
+
+    num_resamplers := AL.alGetInteger(EXT.AL_NUM_RESAMPLERS_SOFT);
+    def_resampler := AL.alGetInteger(EXT.AL_DEFAULT_RESAMPLER_SOFT);
+
+    IF num_resamplers = 0 THEN
+        KernelLog.String("!!! No resamplers found !!!"); KernelLog.Ln; 
+    ELSE
+        KernelLog.String("Available resamplers:"); KernelLog.Ln; 
+        FOR i := 0 TO num_resamplers-1 DO
+            name := EXT.alGetStringiSOFT(EXT.AL_RESAMPLER_NAME_SOFT, i);
+            KernelLog.String("    "); KernelLog.String(name^); 
+            IF i = def_resampler THEN KernelLog.String(" *");  END;
+            KernelLog.Ln; 
+         END;
+    END;
+    i := checkALErrors();
+END printResamplerInfo;
 
 PROCEDURE printEFXInfo(device: AL.ALCdevice );
-TYPE String32=ARRAY 32 OF CHAR;
+TYPE String64 = ARRAY 64 OF CHAR;
 VAR
-    major, minor, sends: AL.ALCint;
-    obj: AL.ALuint ;
-    i:LONGINT;
-    filters, effects : ARRAY [*] OF AL.ALenum;
-    filterNames: ARRAY 4 OF String32;
-    effectNames: ARRAY 14 OF String32;
+	major, minor, sends: AL.ALCint;
+	val: AL.ALenum;	
+	i: LONGINT;
+
+	filters: ARRAY 3 OF String64;
+	filterNames: ARRAY 3 OF String64;
+	
+	effects : ARRAY 13 OF String64;
+	effectNames: ARRAY 16 OF String64;
+	dedeffects: ARRAY 2 OF String64;
 BEGIN    
-    filters :=[ EFX.AL_FILTER_LOWPASS, EFX.AL_FILTER_HIGHPASS, EFX.AL_FILTER_BANDPASS,
-        EFX.AL_FILTER_NULL];
-        filterNames[0] := "Low-Pass";
+
+ 	filters[0]  := "AL_FILTER_LOWPASS";
+	filters[1]  := "AL_FILTER_HIGHPASS";
+	filters[2]  := "AL_FILTER_BANDPASS";
+ 	
+     filterNames[0] := "Low-Pass";
 	filterNames[1] := "High-Pass";
 	filterNames[2] := "Band-Pass";
-	filterNames[3] := "";
-   
-    effects := [
-        EFX.AL_EFFECT_EAXREVERB, EFX.AL_EFFECT_REVERB, EFX.AL_EFFECT_CHORUS,
-        EFX.AL_EFFECT_DISTORTION, EFX.AL_EFFECT_ECHO, EFX.AL_EFFECT_FLANGER,
-        EFX.AL_EFFECT_FREQUENCY_SHIFTER, EFX.AL_EFFECT_VOCAL_MORPHER,
-        EFX.AL_EFFECT_PITCH_SHIFTER, EFX.AL_EFFECT_RING_MODULATOR, EFX.AL_EFFECT_AUTOWAH,
-        EFX.AL_EFFECT_COMPRESSOR, EFX.AL_EFFECT_EQUALIZER, EFX.AL_EFFECT_NULL
-    ];
+	
+    effects[0] := "AL_EFFECT_EAXREVERB";               effects[1] := "AL_EFFECT_REVERB"; 
+    effects[2] := "AL_EFFECT_CHORUS";                    effects[3] := "AL_EFFECT_DISTORTION"; 
+    effects[4] := "AL_EFFECT_ECHO";                        effects[5] := "AL_EFFECT_FLANGER";
+    effects[6] := "AL_EFFECT_FREQUENCY_SHIFTER"; effects[7] := "AL_EFFECT_VOCAL_MORPHER";
+    effects[8] := "AL_EFFECT_PITCH_SHIFTER";        effects[9] := "AL_EFFECT_RING_MODULATOR"; 
+    effects[10] := "AL_EFFECT_AUTOWAH";                 effects[11] := "AL_EFFECT_COMPRESSOR";
+    effects[12] := "AL_EFFECT_EQUALIZER"; 
+      
+    dedeffects[0] := "AL_EFFECT_DEDICATED_DIALOGUE";
+    dedeffects[1] := "AL_EFFECT_DEDICATED_LOW_FREQUENCY_EFFECT";
+
     	effectNames[0] := "EAX Reverb";
     	effectNames[1] := "Reverb";
     	effectNames[2] := "Chorus";
@@ -106,8 +184,9 @@ BEGIN
     	effectNames[10] := "Autowah";
     	effectNames[11] := "Compressor";
     	effectNames[12] := "Equalizer";
-    	effectNames[13] := "";
-
+    	effectNames[13] := "Dediacated Dialog";
+    	effectNames[14] := "Dedicated LFE";
+  
     IF ~AL.alcIsExtensionPresent(device, "ALC_EXT_EFX") THEN   
         KernelLog.String("EFX not available"); KernelLog.Ln; 
         RETURN;
@@ -123,138 +202,133 @@ BEGIN
     IF (checkALCErrors(device) = AL.ALC_NO_ERROR) THEN
         KernelLog.String("Max auxiliary sends: "); KernelLog.Int(sends, 0); KernelLog.Ln; 
     END;
- 
-IF (checkALErrors(2) # AL.AL_NO_ERROR)       OR 
-       (EFX.alGenFilters = NIL) OR (EFX.alDeleteFilters = NIL) OR (EFX.alFilteri= NIL)  OR
-       (EFX.alGenEffects= NIL) OR (EFX.alDeleteEffects= NIL) OR (EFX.alEffecti= NIL) THEN
-    
-        KernelLog.String("!!! Missing EFX functions !!!"); KernelLog.Ln; 
-        RETURN
- END;   
- 
-(* *************************** *)
-	EFX.alGenFilters(1, ADDRESSOF(obj));
-	IF (checkALErrors(3) = AL.AL_NO_ERROR) THEN
-		FOR i := 0 TO LEN(filters,0)-1 DO
-			EFX.alFilteri(obj, EFX.AL_FILTER_TYPE, filters[i]);
-			IF (AL.alGetError() # AL.AL_NO_ERROR) THEN filterNames[i] := "-"; END;
-		END;    
-		EFX.alDeleteFilters(1, ADDRESSOF(obj));
-		i := checkALErrors(4);
 
-		KernelLog.String("Supported filters:"); KernelLog.Ln; 
-		FOR i:=0 TO LEN(filterNames,0)-2 DO
-			IF filterNames[i] # "-" THEN KernelLog.String(filterNames[i]); KernelLog.String(", "); END;
-		END;
-		KernelLog.Ln; 
+	FOR i := 0 TO LEN(filters, 0) - 1 DO
+		val := AL.alGetEnumValue(filters[i]);
+		IF (AL.alGetError() # AL.AL_NO_ERROR) OR (val = 0) OR (val = -1) THEN filterNames[i] := "-"; END;
+	END;    
+
+	KernelLog.String("Supported filters:"); KernelLog.Ln; 
+	FOR i:=0 TO LEN(filterNames,0)-2 DO
+		IF filterNames[i] # "-" THEN KernelLog.String(filterNames[i]); KernelLog.String(", "); END;
 	END;
-	
-	(* *************************** *)
-	EFX.alGenEffects(1, ADDRESSOF(obj));
-	IF (checkALErrors(5) = AL.AL_NO_ERROR) THEN
-		FOR i := 0 TO LEN(effects,0)-1 DO
-			EFX.alEffecti(obj, EFX.AL_EFFECT_TYPE, effects[i]);
-			IF (AL.alGetError() # AL.AL_NO_ERROR) THEN effectNames[i] := "-"; END;
-		END;	
-		EFX.alDeleteEffects(1, ADDRESSOF(obj));
-		i:= checkALErrors(6);
+	KernelLog.Ln; 
 
-		KernelLog.String("Supported effects:"); KernelLog.Ln; 
-		FOR i:=0 TO LEN(effectNames,0)-2 DO
-			IF effectNames[i] # "-" THEN KernelLog.String(effectNames[i]); KernelLog.String(", "); END;
+	FOR i := 0 TO LEN(effects, 0) - 1 DO
+		val := AL.alGetEnumValue(effects[i]);
+		IF (AL.alGetError() # AL.AL_NO_ERROR) OR (val =0) OR (val = -1) THEN effectNames[i] := "-"; END;
+	END;	
+
+	KernelLog.String("Supported effects:"); KernelLog.Ln; 
+	FOR i:=0 TO LEN(effects, 0)-1 DO
+		IF effectNames[i] # "-" THEN KernelLog.String(effectNames[i]); KernelLog.String(", "); END;
+	END;
+		
+	IF AL.alcIsExtensionPresent(device, "ALC_EXT_DEDICATED") THEN
+		FOR i := 0 TO LEN(dedeffects, 0) - 1 DO
+			val := AL.alGetEnumValue(dedeffects[i]);
+			IF (AL.alGetError() # AL.AL_NO_ERROR) OR (val =0) OR (val = -1) THEN effectNames[LEN(effects)+i] := "-"; END;
 		END;
-		KernelLog.Ln;        
-	 END;
+		FOR i:=0 TO LEN(dedeffects, 0)-1 DO
+			IF effectNames[LEN(effects)+i] # "-" THEN KernelLog.String(effectNames[LEN(effects)+i]); KernelLog.String(", "); END;
+		END;		
+	 END; 
 END printEFXInfo;
 
-
-
-PROCEDURE Do*;
+PROCEDURE Do*(cmd: Commands.Context);
 VAR  
-  i : LONGINT;
-  dname: ARRAY 64 OF CHAR;	
-  dynstr: PString256;
-  file: Files.File;
-  fwr: Files.Writer;
+	i : LONGINT;
+	dname: ARRAY 64 OF CHAR;	
+	dynstr: StringArray;
+	file: Files.File;
+	fwr: Files.Writer;
 BEGIN
  
- file := Files.New(openalPlayFile);
- Files.OpenWriter(fwr, file, 0);
+	file := Files.New(openalPlayFile);
+	Files.OpenWriter(fwr, file, 0);
  
- KernelLog.String("*****************************************"); KernelLog.Ln; 
- KernelLog.String("Available playback devices: "); KernelLog.Ln; 
+	KernelLog.String("*****************************************"); KernelLog.Ln; 
+	KernelLog.String("Available playback devices: "); KernelLog.Ln; 
  
-  IF AL.alcIsExtensionPresent(0, "ALC_ENUMERATE_ALL_EXT")  THEN
-  	dynstr :=AL.ALCGetDeviceList(0, AL.ALC_ALL_DEVICES_SPECIFIER);
-  	   FOR i:=0 TO LEN(dynstr)-1 DO   
-		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
-		   fwr.String("#"); fwr.String(dynstr[i]); fwr.Ln;
-	  END;
-  ELSE
-  	dynstr := AL.ALCGetDeviceList(0, AL.ALC_DEVICE_SPECIFIER);
-  	   FOR i:=0 TO LEN(dynstr)-1 DO   
-		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
-		    fwr.String("#"); fwr.String(dynstr[i]); fwr.Ln;
-	  END;
-  END;
-  fwr.Update;
-  Files.Register(file);
+	IF AL.alcIsExtensionPresent(NIL, "ALC_ENUMERATE_ALL_EXT")  THEN
+		dynstr :=AL.ALCGetDeviceList(NIL, AL.ALC_ALL_DEVICES_SPECIFIER);
+		FOR i:=0 TO LEN(dynstr)-1 DO   
+			KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
+			fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+	 	END;
+	ELSE
+		dynstr := AL.ALCGetDeviceList(NIL, AL.ALC_DEVICE_SPECIFIER);
+		FOR i:=0 TO LEN(dynstr)-1 DO   
+			KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
+			fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+	 	END;
+	END;
+	
+	fwr.Update;
+	Files.Register(file);
   
- KernelLog.String("*****************************************"); KernelLog.Ln;         
+	KernelLog.String("*****************************************"); KernelLog.Ln;         
 
- file := Files.New(openalCapFile);
- Files.OpenWriter(fwr, file, 0);
+	file := Files.New(openalCapFile);
+	Files.OpenWriter(fwr, file, 0);
   	    
-  KernelLog.String("Available capture devices: "); KernelLog.Ln; 
-  dynstr := AL.ALCGetDeviceList(0, AL.ALC_CAPTURE_DEVICE_SPECIFIER);
-  	   FOR i:=0 TO LEN(dynstr)-1 DO   
-		   KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]); KernelLog.Ln;
-		   fwr.String("#"); fwr.String(dynstr[i]); fwr.Ln;
-	  END;
-  fwr.Update;
-  Files.Register(file);
+	KernelLog.String("Available capture devices: "); KernelLog.Ln; 
+	dynstr := AL.ALCGetDeviceList(NIL, AL.ALC_CAPTURE_DEVICE_SPECIFIER);
+	FOR i:=0 TO LEN(dynstr)-1 DO   
+		KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
+		fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+	END;
+	fwr.Update;
+	Files.Register(file);
 	  
- KernelLog.String("*****************************************"); KernelLog.Ln;
+	KernelLog.String("*****************************************"); KernelLog.Ln;
     
- KernelLog.String("Default playback device: ");
- str := AL.ALCGetString(0, AL.ALC_DEFAULT_DEVICE_SPECIFIER);
- KernelLog.String(str^); KernelLog.Ln;
+	KernelLog.String("Default playback device: ");
+	IF AL.alcIsExtensionPresent(NIL, "ALC_ENUMERATE_ALL_EXT") THEN
+		str := AL.alcGetString(NIL, AL.ALC_DEFAULT_ALL_DEVICES_SPECIFIER);
+	ELSE
+		str := AL.alcGetString(NIL, AL.ALC_DEFAULT_DEVICE_SPECIFIER);
+	END; 
+	KernelLog.String(str^); KernelLog.Ln;
   
- KernelLog.String("Default capture device: ");
- str := AL.ALCGetString(0, AL.ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
- KernelLog.String(str^); KernelLog.Ln;
+	KernelLog.String("Default capture device: ");
+	str := AL.alcGetString(NIL, AL.ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
+	KernelLog.String(str^); KernelLog.Ln;
  
- printALCInfo(0);
+	printALCInfo(NIL);
  
-  device := AL.alcOpenDevice(""); (* use default *)
-  IF device = 0 THEN 
-	KernelLog.String("!!! Failed to open ");
-	KernelLog.String(dname); KernelLog.String(" default device !!!"); KernelLog.Ln; 
-	RETURN
-  END;  
+ 	(* if a device name is given, use it *)
+	IF cmd.arg.GetString(dname) THEN
+		device := AL.alcOpenDevice(dname); (* use given name *)
+	ELSE
+		device := AL.alcOpenDevice(""); (* use default *)
+	END;
 
-   str := AL.ALCGetString(device,   AL.ALC_DEVICE_SPECIFIER);
-   KernelLog.String("** Info for device "); KernelLog.String(str^); KernelLog.String(" **"); KernelLog.Ln; 
-   
-  printALCInfo(device);
+	IF device = NIL THEN 
+		KernelLog.String("!!! Failed to open ");
+		KernelLog.String(dname); KernelLog.String(" default device !!!"); KernelLog.Ln; 
+		RETURN
+	END;  
+
+	printALCInfo(device);
+	printHRTFInfo(device);
   
-    context := AL.alcCreateContext(device, 0);
+	context := AL.alcCreateContext(device, NIL);
     
-    IF (context = 0) OR  (~ AL.alcMakeContextCurrent(context) ) THEN    
-	        IF context # 0 THEN   AL.alcDestroyContext(context); END;
-        res := AL.alcCloseDevice(device);
-        KernelLog.String("!!! Failed to set a context !!!"); KernelLog.Ln; KernelLog.Ln; 
-        RETURN;
-   END;
+	IF (context = NIL) OR  (~ AL.alcMakeContextCurrent(context) ) THEN    
+		IF context # NIL THEN AL.alcDestroyContext(context); END;
+		res := AL.alcCloseDevice(device);
+		KernelLog.String("!!! Failed to set a context !!!"); KernelLog.Ln; KernelLog.Ln; 
+		RETURN;
+	END;
 
-    printALInfo();
-    
-   printEFXInfo(device); 
+	printALInfo();
+	printResamplerInfo();
+	printEFXInfo(device); 
 
-    res := AL.alcMakeContextCurrent(0);
-    AL.alcDestroyContext(context);
-    res := AL.alcCloseDevice(device);
-
+	res := AL.alcMakeContextCurrent(0);
+	AL.alcDestroyContext(context);
+	res := AL.alcCloseDevice(device);
 END Do;
 
 BEGIN
@@ -263,6 +337,8 @@ END OpenALinfo.
 
 
 OpenALinfo.Do ~
+OpenALinfo.Do "HDA Intel, ALC883 Analog (CARD=Intel,DEV=0)" ~ 
+OpenALinfo.Do "HDA Intel, ALC883 Digital (CARD=Intel,DEV=1)"~
 
-SystemTools.FreeDownTo OpenAL~ 
+System.FreeDownTo OpenAL~ 
 
