@@ -203,36 +203,37 @@ BEGIN
         KernelLog.String("Max auxiliary sends: "); KernelLog.Int(sends, 0); KernelLog.Ln; 
     END;
 
-	FOR i := 0 TO LEN(filters, 0) - 1 DO
+	FOR i := 0 TO LEN(filters) - 1 DO
 		val := AL.alGetEnumValue(filters[i]);
 		IF (AL.alGetError() # AL.AL_NO_ERROR) OR (val = 0) OR (val = -1) THEN filterNames[i] := "-"; END;
 	END;    
 
 	KernelLog.String("Supported filters:"); KernelLog.Ln; 
-	FOR i:=0 TO LEN(filterNames,0)-2 DO
+	FOR i:=0 TO LEN(filterNames)-1 DO
 		IF filterNames[i] # "-" THEN KernelLog.String(filterNames[i]); KernelLog.String(", "); END;
 	END;
 	KernelLog.Ln; 
 
-	FOR i := 0 TO LEN(effects, 0) - 1 DO
+	FOR i := 0 TO LEN(effects) - 1 DO
 		val := AL.alGetEnumValue(effects[i]);
 		IF (AL.alGetError() # AL.AL_NO_ERROR) OR (val =0) OR (val = -1) THEN effectNames[i] := "-"; END;
 	END;	
 
 	KernelLog.String("Supported effects:"); KernelLog.Ln; 
-	FOR i:=0 TO LEN(effects, 0)-1 DO
+	FOR i:=0 TO LEN(effects)-1 DO
 		IF effectNames[i] # "-" THEN KernelLog.String(effectNames[i]); KernelLog.String(", "); END;
 	END;
-		
+	
 	IF AL.alcIsExtensionPresent(device, "ALC_EXT_DEDICATED") THEN
-		FOR i := 0 TO LEN(dedeffects, 0) - 1 DO
+		FOR i := 0 TO LEN(dedeffects) - 1 DO
 			val := AL.alGetEnumValue(dedeffects[i]);
 			IF (AL.alGetError() # AL.AL_NO_ERROR) OR (val =0) OR (val = -1) THEN effectNames[LEN(effects)+i] := "-"; END;
 		END;
-		FOR i:=0 TO LEN(dedeffects, 0)-1 DO
+		FOR i:=0 TO LEN(dedeffects)-1 DO
 			IF effectNames[LEN(effects)+i] # "-" THEN KernelLog.String(effectNames[LEN(effects)+i]); KernelLog.String(", "); END;
 		END;		
 	 END; 
+	 KernelLog.Ln; 
 END printEFXInfo;
 
 PROCEDURE Do*(cmd: Commands.Context);
