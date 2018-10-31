@@ -682,49 +682,49 @@ CONST
 	
 TYPE
 	(* Effect object function types. *)
-	TalGenEffects* = PROCEDURE {C} (n: ALsizei;   effects: PALuint);
-	TalDeleteEffects*= PROCEDURE {C} (n: ALsizei;  effects: PALuint);
-	TalIsEffect* = PROCEDURE {C} (effect: ALuint): ALboolean;
-	TalEffecti* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  iValue: ALint);
-	TalEffectiv* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  piValues: PALint);
-	TalEffectf* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  flValue: ALfloat);
-	TalEffectfv* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
-	TalGetEffecti* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  VAR piValue: ALint);
-	TalGetEffectiv* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  piValues: PALint);
-	TalGetEffectf* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	TalGetEffectfv* = PROCEDURE {C} (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
+	TalGenEffects* = PROCEDURE {PlatformCC} (n: ALsizei;   effects: PALuint);
+	TalDeleteEffects*= PROCEDURE {PlatformCC} (n: ALsizei;  effects: PALuint);
+	TalIsEffect* = PROCEDURE {PlatformCC} (effect: ALuint): ALboolean;
+	TalEffecti* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  iValue: ALint);
+	TalEffectiv* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  piValues: PALint);
+	TalEffectf* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  flValue: ALfloat);
+	TalEffectfv* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
+	TalGetEffecti* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  VAR piValue: ALint);
+	TalGetEffectiv* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  piValues: PALint);
+	TalGetEffectf* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	TalGetEffectfv* = PROCEDURE {PlatformCC} (effect: ALuint;  param: ALenum;  pflValues: PALfloat);
 	
 	(* Filter object function types. *)
-	TalGenFilters* = PROCEDURE {C} (n: ALsizei;  filters: PALuint);
-	TalDeleteFilters* = PROCEDURE {C} (n: ALsizei;  filters: PALuint);
-	TalIsFilter* = PROCEDURE {C} (filter: ALuint): ALboolean;
-	TalFilteri* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  iValue: ALint);
-	TalFilteriv* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  piValues: PALint);
-	TalFilterf* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  flValue: ALfloat);
-	TalFilterfv* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
-	TalGetFilteri* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  VAR piValue: ALint);
-	TalGetFilteriv* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  piValues: PALint);
-	TalGetFilterf* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	TalGetFilterfv* = PROCEDURE {C} (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
+	TalGenFilters* = PROCEDURE {PlatformCC} (n: ALsizei;  filters: PALuint);
+	TalDeleteFilters* = PROCEDURE {PlatformCC} (n: ALsizei;  filters: PALuint);
+	TalIsFilter* = PROCEDURE {PlatformCC} (filter: ALuint): ALboolean;
+	TalFilteri* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  iValue: ALint);
+	TalFilteriv* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  piValues: PALint);
+	TalFilterf* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  flValue: ALfloat);
+	TalFilterfv* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
+	TalGetFilteri* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  VAR piValue: ALint);
+	TalGetFilteriv* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  piValues: PALint);
+	TalGetFilterf* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	TalGetFilterfv* = PROCEDURE {PlatformCC} (filter: ALuint;  param: ALenum;  pflValues: PALfloat);
 	
 	(* Auxiliary Effect Slot object function types. *)
-	TalGenAuxiliaryEffectSlots* = PROCEDURE {C} (n: ALsizei;   effectslots: PALuint);
-	TalDeleteAuxiliaryEffectSlots* = PROCEDURE {C} (n: ALsizei;  effectslots: PALuint);
-	TalIsAuxiliaryEffectSlot* = PROCEDURE {C} (effectslot: ALuint): ALboolean;
+	TalGenAuxiliaryEffectSlots* = PROCEDURE {PlatformCC} (n: ALsizei;   effectslots: PALuint);
+	TalDeleteAuxiliaryEffectSlots* = PROCEDURE {PlatformCC} (n: ALsizei;  effectslots: PALuint);
+	TalIsAuxiliaryEffectSlot* = PROCEDURE {PlatformCC} (effectslot: ALuint): ALboolean;
 	(*! type check error, there is an inconsistency when using
 		alAuxiliaryEffectSloti(ieffectSlot, Efx.AL_EFFECTSLOT_EFFECT, effect);
 
 		so, value type is changed to ALuint.
 	*)
-	(* TalAuxiliaryEffectSloti* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  iValue: ALint); *)
-	TalAuxiliaryEffectSloti* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  iValue: ALuint);
-	TalAuxiliaryEffectSlotiv* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  piValues: PALint);
-	TalAuxiliaryEffectSlotf* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  flValue: ALfloat);
-	TalAuxiliaryEffectSlotfv* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
-	TalGetAuxiliaryEffectSloti* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  VAR piValue: ALint);
-	TalGetAuxiliaryEffectSlotiv* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  piValues: PALint);
-	TalGetAuxiliaryEffectSlotf* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
-	TalGetAuxiliaryEffectSlotfv* = PROCEDURE {C} (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+	(* TalAuxiliaryEffectSloti* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  iValue: ALint); *)
+	TalAuxiliaryEffectSloti* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  iValue: ALuint);
+	TalAuxiliaryEffectSlotiv* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  piValues: PALint);
+	TalAuxiliaryEffectSlotf* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  flValue: ALfloat);
+	TalAuxiliaryEffectSlotfv* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
+	TalGetAuxiliaryEffectSloti* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  VAR piValue: ALint);
+	TalGetAuxiliaryEffectSlotiv* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  piValues: PALint);
+	TalGetAuxiliaryEffectSlotf* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  VAR pflValue: ALfloat);
+	TalGetAuxiliaryEffectSlotfv* = PROCEDURE {PlatformCC} (effectslot: ALuint;  param: ALenum;  pflValues: PALfloat);
 
 (************************ *)
 

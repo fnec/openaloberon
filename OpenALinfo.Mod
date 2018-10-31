@@ -62,7 +62,6 @@ BEGIN
 	IF (checkALCErrors(device) = AL.ALC_NO_ERROR) THEN
 		KernelLog.String("ALC version: "); KernelLog.Int(major, 0); KernelLog.String(".");  KernelLog.Int(minor, 0); KernelLog.Ln; 
 	END;
-        
     IF device # NIL THEN   
         KernelLog.String("ALC extensions: "); 
         str := AL.alcGetString(device, AL.ALC_EXTENSIONS);
@@ -253,15 +252,19 @@ BEGIN
  
 	IF AL.alcIsExtensionPresent(NIL, "ALC_ENUMERATE_ALL_EXT")  THEN
 		dynstr :=AL.ALCGetDeviceList(NIL, AL.ALC_ALL_DEVICES_SPECIFIER);
-		FOR i:=0 TO LEN(dynstr)-1 DO   
-			KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
-			fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+		IF dynstr # NIL THEN
+			FOR i:=0 TO LEN(dynstr)-1 DO   
+				KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
+				fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+		 	END;
 	 	END;
 	ELSE
 		dynstr := AL.ALCGetDeviceList(NIL, AL.ALC_DEVICE_SPECIFIER);
-		FOR i:=0 TO LEN(dynstr)-1 DO   
-			KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
-			fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+		IF dynstr # NIL THEN
+			FOR i:=0 TO LEN(dynstr)-1 DO   
+				KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
+				fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+		 	END;
 	 	END;
 	END;
 	
@@ -275,9 +278,11 @@ BEGIN
   	    
 	KernelLog.String("Available capture devices: "); KernelLog.Ln; 
 	dynstr := AL.ALCGetDeviceList(NIL, AL.ALC_CAPTURE_DEVICE_SPECIFIER);
-	FOR i:=0 TO LEN(dynstr)-1 DO   
-		KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
-		fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+	IF dynstr # NIL THEN
+		FOR i:=0 TO LEN(dynstr)-1 DO   
+			KernelLog.Int(i, 0); KernelLog.String(": ");  KernelLog.String(dynstr[i]^); KernelLog.Ln;
+			fwr.String("#"); fwr.String(dynstr[i]^); fwr.Ln;
+		END;
 	END;
 	fwr.Update;
 	Files.Register(file);
@@ -296,15 +301,15 @@ BEGIN
 	str := AL.alcGetString(NIL, AL.ALC_CAPTURE_DEFAULT_DEVICE_SPECIFIER);
 	KernelLog.String(str^); KernelLog.Ln;
  
-	printALCInfo(NIL);
- 
+ 	printALCInfo(NIL);
+	
  	(* if a device name is given, use it *)
 	IF cmd.arg.GetString(dname) THEN
 		device := AL.alcOpenDevice(dname); (* use given name *)
 	ELSE
 		device := AL.alcOpenDevice(""); (* use default *)
 	END;
-
+	
 	IF device = NIL THEN 
 		KernelLog.String("!!! Failed to open ");
 		KernelLog.String(dname); KernelLog.String(" default device !!!"); KernelLog.Ln; 

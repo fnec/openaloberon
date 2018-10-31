@@ -10,7 +10,7 @@ CONST
 #IF UNIX THEN
 	libname = "libopenal.so.1";
 #ELSE
-	libname = "soft_oal.dll";
+	libname = "soft_oal.dll";  (* OpenaAL32.dll *)
 #END
 	
 	
@@ -25,7 +25,7 @@ TYPE
 	ALushort* = UNSIGNED16;     (* unsigned 16-bit integer *)
 	ALint* = LONGINT;  (* signed 32-bit 2's complement intege *)
 	ALuint* = UNSIGNED32;    (* unsigned 32-bit integer *)
-	ALsizei* = SIZE;  (* non-negative 32-bit binary integer size *)
+	ALsizei* = LONGINT;  (* non-negative 32-bit binary integer size *)
 	ALenum* = LONGINT; (* enumerated 32-bit value *)
 
 	ALfloat* = REAL; (* 32-bit IEEE754 floating-point *)
@@ -884,9 +884,9 @@ END alcGetProcAddress;
 
 (* Get string from address *)
 PROCEDURE GetStringFromAddr*(adr: ADDRESS): Strings.String;
-VAR s {UNTRACED}: POINTER {UNSAFE} TO ARRAY OF CHAR;
+VAR s: POINTER {UNSAFE} TO ARRAY OF CHAR;
 	str: Strings.String;
-	pos: SIZE;
+	pos: LONGINT;
 BEGIN
 	s := adr;
 	pos := 0;
@@ -918,18 +918,18 @@ END alcGetString;
 
 PROCEDURE GetDevStringFromAddr*(adr: ADDRESS): Strings.String;
 VAR 
-	pstr {UNTRACED}: POINTER {UNSAFE} TO ARRAY OF CHAR;
+	pstr : POINTER {UNSAFE} TO ARRAY OF CHAR;
 	str: Strings.String;
-	pos: SIZE; 
+	pos: LONGINT; 
 BEGIN
 	pstr := adr;
 	pos := 0;
-	WHILE pstr[pos] # 0X DO INC(pos); END;
-	IF pos = 0 THEN RETURN NIL END;
-	
-	NEW(str, pos + 1);
-	pos := 0;
-	WHILE pstr[pos] # 0X DO str[pos] := pstr[pos]; 	INC(pos); END;
+		WHILE pstr[pos] # 0X DO INC(pos); END;
+		IF pos = 0 THEN RETURN NIL END;
+		
+		NEW(str, pos + 1);
+		pos := 0;
+		WHILE pstr[pos] # 0X DO str[pos] := pstr[pos]; 	INC(pos); END;
 	str[pos] := 0X;
 
 	RETURN str;
@@ -940,8 +940,8 @@ END GetDevStringFromAddr;
 PROCEDURE ALCGetDeviceList*(device: ALCdevice; name: ALCenum): StringArray;
 VAR  
 	dynstr: StringArray;
-	pstr {UNTRACED} : POINTER {UNSAFE} TO ARRAY OF CHAR;
-	size: SIZE; 
+	pstr : POINTER {UNSAFE} TO ARRAY OF CHAR;
+	size: LONGINT; 
 	adr: ADDRESS;
 	str : Strings.String;
 BEGIN
@@ -949,7 +949,7 @@ BEGIN
 
 	pstr := XalcGetString(device, name);
 	(* count array size *)
-
+	IF pstr = NIL THEN RETURN NIL END;
 	adr := pstr;
 	str := GetDevStringFromAddr(pstr);
 	WHILE (str # NIL) & (size < 10) DO		

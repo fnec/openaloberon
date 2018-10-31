@@ -91,7 +91,7 @@ CONST
 
 	(* AL_EXT_STATIC_BUFFER extension *)
 TYPE 
-	TalBufferDataStatic* = PROCEDURE {C} (buffer: ALint; format: ALenum; data: ALvoid; size, freq: ALsizei);
+	TalBufferDataStatic* = PROCEDURE {PlatformCC} (buffer: ALint; format: ALenum; data: ALvoid; size, freq: ALsizei);
 VAR 
 	alBufferDataStatic-: TalBufferDataStatic;
 
@@ -101,8 +101,8 @@ CONST
 
 TYPE
 	(* ALC_EXT_thread_local_context extension *)
-	TalcSetThreadContext* = PROCEDURE {C} (context: ALCcontext): ALCboolean;  
-	TalcGetThreadContext* = PROCEDURE {C} (): ALCcontext;  
+	TalcSetThreadContext* = PROCEDURE {PlatformCC} (context: ALCcontext): ALCboolean;  
+	TalcGetThreadContext* = PROCEDURE {PlatformCC} (): ALCcontext;  
 
 VAR
 	alcSetThreadContext- : TalcSetThreadContext;
@@ -111,7 +111,7 @@ VAR
 
 CONST	AL_SOURCE_DISTANCE_MODEL* = 200H;
 TYPE
-	TalBufferSubDataSOFT* = PROCEDURE{C}(buffer: ALuint; format: ALenum; data: ALvoid; offset: ALsizei; lengthx: ALsizei);
+	TalBufferSubDataSOFT* = PROCEDURE{PlatformCC}(buffer: ALuint; format: ALenum; data: ALvoid; offset: ALsizei; lengthx: ALsizei);
 VAR 
 	alBufferSubDataSOFT- : TalBufferSubDataSOFT;
 
@@ -127,9 +127,9 @@ CONST
 	AL_FOLDBACK_MODE_STEREO* = 4102H;
 
 TYPE
-	TFoldbackallbackProc = PROCEDURE {C}(a: ALenum; b: ALsizei);
-	TalRequestFoldbackStart* = PROCEDURE {C} (mode: ALenum; count: ALsizei; length: ALsizei; mem: PALfloat; callback: TFoldbackallbackProc );
-	TalRequestFoldbackStop* = PROCEDURE {C}(void: ALvoid);
+	TFoldbackallbackProc = PROCEDURE {PlatformCC}(a: ALenum; b: ALsizei);
+	TalRequestFoldbackStart* = PROCEDURE {PlatformCC} (mode: ALenum; count: ALsizei; length: ALsizei; mem: PALfloat; callback: TFoldbackallbackProc );
+	TalRequestFoldbackStop* = PROCEDURE {PlatformCC}(void: ALvoid);
 VAR
 	alRequestFoldbackStart-: TalRequestFoldbackStart;
 	alRequestFoldbackStop- : TalRequestFoldbackStop;
@@ -192,10 +192,10 @@ CONST
 	AL_SEC_LENGTH_SOFT* = 200BH;
 
 TYPE
-	TalBufferSamplesSOFT* = PROCEDURE {C}(buffer: ALuint; samplerate: ALuint; internalformat: ALenum;  samples: ALsizei; channels: ALenum; type: ALenum; data: ALvoid);
-	TalBufferSubSamplesSOFT* = PROCEDURE {C} (buffer: ALuint; offset: ALsizei; samples: ALsizei; channels: ALenum; type: ALenum; data: ALvoid);
-	TalGetBufferSamplesSOFT* = PROCEDURE {C}(buffer: ALuint; offset: ALsizei; samples: ALsizei; channels: ALenum; type: ALenum; data: ALvoid);
-	TalIsBufferFormatSupportedSOFT* = PROCEDURE {C}(format: ALenum): ALboolean;
+	TalBufferSamplesSOFT* = PROCEDURE {PlatformCC}(buffer: ALuint; samplerate: ALuint; internalformat: ALenum;  samples: ALsizei; channels: ALenum; type: ALenum; data: ALvoid);
+	TalBufferSubSamplesSOFT* = PROCEDURE {PlatformCC} (buffer: ALuint; offset: ALsizei; samples: ALsizei; channels: ALenum; type: ALenum; data: ALvoid);
+	TalGetBufferSamplesSOFT* = PROCEDURE {PlatformCC}(buffer: ALuint; offset: ALsizei; samples: ALsizei; channels: ALenum; type: ALenum; data: ALvoid);
+	TalIsBufferFormatSupportedSOFT* = PROCEDURE {PlatformCC}(format: ALenum): ALboolean;
 
 VAR 
 	alBufferSamplesSOFT-: TalBufferSamplesSOFT;
@@ -230,9 +230,9 @@ CONST
 
 
 TYPE
-	TalcLoopbackOpenDeviceSOFT* = PROCEDURE {C}(CONST  devicename: ARRAY OF ALchar): ALCdevice;
-	TalcIsRenderFormatSupportedSOFT* = PROCEDURE {C}(device: ALCdevice; freq: ALCsizei; channels: ALCenum; type: ALCenum): ALCboolean;
-	TalcRenderSamplesSOFT* = PROCEDURE {C}(device: ALCdevice; buffer: ALCvoid; samples: ALCsizei);
+	TalcLoopbackOpenDeviceSOFT* = PROCEDURE {PlatformCC}(CONST  devicename: ARRAY OF ALchar): ALCdevice;
+	TalcIsRenderFormatSupportedSOFT* = PROCEDURE {PlatformCC}(device: ALCdevice; freq: ALCsizei; channels: ALCenum; type: ALCenum): ALCboolean;
+	TalcRenderSamplesSOFT* = PROCEDURE {PlatformCC}(device: ALCdevice; buffer: ALCvoid; samples: ALCsizei);
 VAR 
 	alcLoopbackOpenDeviceSOFT- : TalcLoopbackOpenDeviceSOFT;
 	alcIsRenderFormatSupportedSOFT-: TalcIsRenderFormatSupportedSOFT;
@@ -256,18 +256,18 @@ TYPE
 	PALint64SOFT* = ADDRESS;
 	PALuint64SOFT* = ADDRESS;
 	
-	TalSourcedSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; value: ALdouble);
-	TalSource3dSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; value1, value2, value3: ALdouble);
-	TalSourcedvSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; values: PALdouble);
-	TalGetSourcedSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; VAR value: ALdouble);
-	TalGetSource3dSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; VAR value1, value2, value3: ALdouble);
-	TalGetSourcedvSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; values: PALdouble);
-	TalSourcei64SOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; value: ALint64SOFT);
-	TalSource3i64SOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; value1, value2, value3: ALint64SOFT);
-	TalSourcei64vSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; values: PALint64SOFT);
-	TalGetSourcei64SOFT* = PROCEDURE {C}(source: ALuint; param: ALenum; VAR value: ALint64SOFT);
-	TalGetSource3i64SOFT* = PROCEDURE {C}(source: ALuint; param: ALenum;  VAR value1, value2, value3: ALint64SOFT);
-	TalGetSourcei64vSOFT* = PROCEDURE {C}(source: ALuint; param: ALenum;  values: PALint64SOFT);
+	TalSourcedSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; value: ALdouble);
+	TalSource3dSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; value1, value2, value3: ALdouble);
+	TalSourcedvSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; values: PALdouble);
+	TalGetSourcedSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; VAR value: ALdouble);
+	TalGetSource3dSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; VAR value1, value2, value3: ALdouble);
+	TalGetSourcedvSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; values: PALdouble);
+	TalSourcei64SOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; value: ALint64SOFT);
+	TalSource3i64SOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; value1, value2, value3: ALint64SOFT);
+	TalSourcei64vSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; values: PALint64SOFT);
+	TalGetSourcei64SOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum; VAR value: ALint64SOFT);
+	TalGetSource3i64SOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum;  VAR value1, value2, value3: ALint64SOFT);
+	TalGetSourcei64vSOFT* = PROCEDURE {PlatformCC}(source: ALuint; param: ALenum;  values: PALint64SOFT);
 
 VAR
 
@@ -292,8 +292,8 @@ CONST
 	AL_DEFERRED_UPDATES_SOFT* = 0C002H;
 
 TYPE
-	TalDeferUpdatesSOFT* = PROCEDURE {C} (void: ALvoid);
-	TalProcessUpdatesSOFT* = PROCEDURE {C}(void: ALvoid);
+	TalDeferUpdatesSOFT* = PROCEDURE {PlatformCC} (void: ALvoid);
+	TalProcessUpdatesSOFT* = PROCEDURE {PlatformCC}(void: ALvoid);
 VAR
 	alDeferUpdatesSOFT- : TalDeferUpdatesSOFT;
 	alProcessUpdatesSOFT- : TalProcessUpdatesSOFT;
@@ -315,8 +315,8 @@ CONST
 
 	(* ALC_SOFT_pause_device *)
 TYPE 
-	TalcDevicePauseSOFT* = PROCEDURE {C} (device: ALCdevice);
-	TalcDeviceResumeSOFT* = PROCEDURE {C} (device: ALCdevice);
+	TalcDevicePauseSOFT* = PROCEDURE {PlatformCC} (device: ALCdevice);
+	TalcDeviceResumeSOFT* = PROCEDURE {PlatformCC} (device: ALCdevice);
 VAR
 	alcDevicePauseSOFT-: TalcDevicePauseSOFT;
 	alcDeviceResumeSOFT- : TalcDeviceResumeSOFT;
@@ -350,10 +350,10 @@ CONST
 	ALC_HRTF_ID_SOFT* = 1996H;
 	
 TYPE
-	TalcGetStringiSOFT* = PROCEDURE {C} (device: ALCdevice; paramName: ALCenum; index: ALCsizei): ADDRESS;
-	TalcResetDeviceSOFT* = PROCEDURE {C} (device: ALCdevice; attribs: ADDRESS (* array of ALCint *)): ALCboolean;
+	TalcGetStringiSOFT* = PROCEDURE {PlatformCC} (device: ALCdevice; paramName: ALCenum; index: ALCsizei): ADDRESS;
+	TalcResetDeviceSOFT* = PROCEDURE {PlatformCC} (device: ALCdevice; attribs: ADDRESS (* array of ALCint *)): ALCboolean;
 	
-	TalGetStringiSOFT* = PROCEDURE {C} (paramName: ALCenum; index: ALCsizei): ADDRESS;
+	TalGetStringiSOFT* = PROCEDURE {PlatformCC} (paramName: ALCenum; index: ALCsizei): ADDRESS;
 VAR 
 	xalcGetStringiSOFT : TalcGetStringiSOFT;
 	alcResetDeviceSOFT- : TalcResetDeviceSOFT;
