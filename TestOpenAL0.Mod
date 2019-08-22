@@ -147,7 +147,7 @@ BEGIN
   END;  
 
   AL.alGenBuffers(1, ADDRESSOF(buffer));
-  sizeBytes := LEN(test)*SIZEOF(INTEGER);
+  sizeBytes := LEN(test)(AL.ALsizei)*SIZEOF(INTEGER);
   
   AL.alBufferData(buffer, AL.AL_FORMAT_MONO16, ADDRESSOF(test[0]), sizeBytes, freq);
   	KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 

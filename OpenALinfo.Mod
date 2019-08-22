@@ -237,7 +237,7 @@ END printEFXInfo;
 
 PROCEDURE Do*(cmd: Commands.Context);
 VAR  
-	i : LONGINT;
+	i : SIZE;
 	dname: ARRAY 64 OF CHAR;	
 	dynstr: StringArray;
 	file: Files.File;

@@ -253,25 +253,25 @@ END Rewind;
 (** play the sources *)
 PROCEDURE Playv*(sources: ARRAY OF AL.ALuint);
 BEGIN
-	AL.alSourcePlayv(LEN(sources), ADDRESSOF(sources[0]));
+	AL.alSourcePlayv(LEN(sources)(AL.ALsizei), ADDRESSOF(sources[0]));
 END Playv;
 
 (** pause the sources *)
 PROCEDURE Pausev*(sources: ARRAY OF AL.ALuint);
 BEGIN
-	AL.alSourcePausev(LEN(sources), ADDRESSOF(sources[0]));
+	AL.alSourcePausev(LEN(sources)(AL.ALsizei), ADDRESSOF(sources[0]));
 END Pausev;
 
 (** stop the sources *)
 PROCEDURE Stopv*(sources: ARRAY OF AL.ALuint);
 BEGIN
-	AL.alSourceStopv(LEN(sources), ADDRESSOF(sources[0]));
+	AL.alSourceStopv(LEN(sources)(AL.ALsizei), ADDRESSOF(sources[0]));
 END Stopv;
 
 (** rewind the sources position to beginning *)
 PROCEDURE Rewindv*(sources: ARRAY OF AL.ALuint);
 BEGIN
-	AL.alSourceRewindv(LEN(sources), ADDRESSOF(sources[0]));
+	AL.alSourceRewindv(LEN(sources)(AL.ALsizei), ADDRESSOF(sources[0]));
 END Rewindv;
 
 
