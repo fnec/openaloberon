@@ -337,7 +337,7 @@ TestOpenALWav.Open "openaloberon/rugby.wav" ~
 TestOpenALWav.Open "openaloberon/s11k16bitpcm.wav" ~
 TestOpenALWav.Open "openaloberon/s11k8bitpcm.wav" ~
 TestOpenALWav.Open "openaloberon/s11kulaw.wav" ~
- TestOpenALWav.Open "openaloberon/s8k16bitpcm.wav" ~
+TestOpenALWav.Open "openaloberon/s8k16bitpcm.wav" ~
 TestOpenALWav.Open "openaloberon/s8k8bitpcm.wav" ~
 TestOpenALWav.Open "openaloberon/s8kulaw.wav" ~
 TestOpenALWav.Open "openaloberon/Wave4.WAV" ~

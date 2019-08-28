@@ -41,15 +41,20 @@ openaloberon will use the default device.
 
 # Install openal libraries
 
-#  UnixAos
-#install 32bit libopenal1
-
- sudo apt-get install libopenal1:i386
-
-#WinAos
+#  UnixA2
+# install 32bit libopenal1:
+   sudo apt install libopenal1:i386
+   
+#install 64bit libopenal1: 
+     sudo apt install libopenal1
+ 
+# Win32, Win64
 Download the latest openal-soft libraries from:
 
-	http://kcat.strangesoft.net/openal-soft-1.16.0-bin.zip
+	http://kcat.strangesoft.net/openal/
+
+Extract "soft_oal.dll",  rename it "OpenAL32.dll" and put it into your work directory.
+ 
 #-----------------------------------------------------------------------
 # Quote from openal-soft-1.16.0-bin.zip readme.txt
 
@@ -61,7 +66,7 @@ so they can use OpenAL Soft without having to build it from source.
 Note that it is still expected to install the OpenAL redistributable provided
 by Creative Labs (at http://openal.org/), as that will provide the "router"
 OpenAL32.dll that applications talk to, and may provide extra drivers for the
-user's hardware. The DLLs provided here will simply add additional devices for
+user`s hardware. The DLLs provided here will simply add additional devices for
 applications to select from. If you do not wish to use the redistributable,
 then rename soft_oal.dll to OpenAL32.dll (note: even the 64-bit DLL should be
 named OpenAL32.dll). Just be aware this will prevent other system-installed
@@ -77,6 +82,8 @@ For 64-bit Windows, the Win32 DLL will typically go into the SysWOW64 folder.
 # Usefull links for documentation and examples:
 http://kcat.strangesoft.net/openal.html
 http://openal.org
+http://github.com/kcat/openal-soft
+
 
 Test files ( s*pcm.wav, s*ulaw.wav) are copied from http://en.wikipedia.org/wiki/WAV
 

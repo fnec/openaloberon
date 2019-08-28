@@ -10,7 +10,7 @@ CONST
 #IF UNIX THEN
 	libname = "libopenal.so.1";
 #ELSE
-	libname = "soft_oal.dll";  (* OpenaAL32.dll *)
+	libname = "OpenAL32.dll";
 #END
 	
 	
@@ -979,6 +979,4 @@ BEGIN
 	LoadFunctions;
 	Modules.InstallTermHandler(OnClose) ;
 END OpenAL.
-
-SystemToo.Free OpenAL~
 
