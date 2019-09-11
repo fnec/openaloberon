@@ -70,10 +70,10 @@ END ALCWriteError;
 PROCEDURE LoadWavFileToBuffer*(CONST fname: ARRAY OF CHAR): AL.ALuint;
 VAR
 	fmt: AL.ALenum; 
-	dres: LONGINT;
+	dres: SIGNED32;
 	file: Files.File;
 	in: Files.Reader;
-	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : LONGINT;
+	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : SIGNED32;
 	buffer : AL.ALuint;
 	err: AL.ALenum;
 BEGIN 
@@ -147,39 +147,39 @@ END LoadWavFileToBuffer;
 
 (* listener procedures *)
 (** set position of the listener to x,y,z*)
-PROCEDURE SetListenerPosition*(x, y, z: REAL);
+PROCEDURE SetListenerPosition*(x, y, z: FLOAT32);
 BEGIN
 	AL.alListener3f(AL.AL_POSITION, x, y, z);
 END SetListenerPosition;
 
 (** set position of the listener to pos vector *)
-PROCEDURE SetListenerPositionv*(pos: ARRAY 3 OF REAL);
+PROCEDURE SetListenerPositionv*(pos: ARRAY 3 OF FLOAT32);
 BEGIN
 	AL.alListenerfv(AL.AL_POSITION, ADDRESSOF(pos[0]));
 END SetListenerPositionv;
 
 (** set velocity of the listener to x,y,z*)
-PROCEDURE SetListenerVelocity*(x, y, z: REAL);
+PROCEDURE SetListenerVelocity*(x, y, z: FLOAT32);
 BEGIN
 	AL.alListener3f(AL.AL_VELOCITY, x, y, z);
 END SetListenerVelocity;
 
 (** set velocity of the listener to vel vector *)
-PROCEDURE SetListenerVelocityv*(vel: ARRAY 3 OF REAL);
+PROCEDURE SetListenerVelocityv*(vel: ARRAY 3 OF FLOAT32);
 BEGIN
 	AL.alListenerfv(AL.AL_VELOCITY, ADDRESSOF(vel[0]));
 END SetListenerVelocityv;
 
 (** set orientation of the listener *)
-PROCEDURE SetListenerOrientation*(fwdx, fwdy,  fwdz: REAL; upx, upy, upz: REAL);
-VAR orient: ARRAY 6 OF REAL;
+PROCEDURE SetListenerOrientation*(fwdx, fwdy,  fwdz: FLOAT32; upx, upy, upz: FLOAT32);
+VAR orient: ARRAY 6 OF FLOAT32;
 BEGIN
 	orient := [fwdx, fwdy,  fwdz, upx, upy, upz];
 	AL.alListenerfv(AL.AL_ORIENTATION, ADDRESSOF(orient[0]));
 END SetListenerOrientation;
 
 (** set orientation of the listener [3 fwd, 3 up] *)
-PROCEDURE SetListenerOrientationv*(dir: ARRAY 6 OF REAL);
+PROCEDURE SetListenerOrientationv*(dir: ARRAY 6 OF FLOAT32);
 BEGIN
 	AL.alListenerfv(AL.AL_ORIENTATION, ADDRESSOF(dir[0]));
 END SetListenerOrientationv;
@@ -196,13 +196,13 @@ BEGIN
 END SetLoop;
 
 (** set position of the source to x,y,z*)
-PROCEDURE SetSourcePosition*(source: AL.ALuint; x, y, z: REAL);
+PROCEDURE SetSourcePosition*(source: AL.ALuint; x, y, z: FLOAT32);
 BEGIN
 	AL.alSource3f(source, AL.AL_POSITION, x, y, z);
 END SetSourcePosition;
 
 (** set position of the source to pos vector *)
-PROCEDURE SetSourcePositionv*(source: AL.ALuint; pos: ARRAY 3 OF REAL);
+PROCEDURE SetSourcePositionv*(source: AL.ALuint; pos: ARRAY 3 OF FLOAT32);
 BEGIN
 	AL.alSourcefv(source, AL.AL_POSITION, ADDRESSOF(pos[0]));
 END SetSourcePositionv;
@@ -346,7 +346,7 @@ BEGIN
 END ClosePlayDevice;
 
 (* not tested, open capture device, read from configuration file *)
-PROCEDURE OpenCaptureDevice*(freq: LONGINT; fmt: AL.ALenum; samples: LONGINT);
+PROCEDURE OpenCaptureDevice*(freq: SIGNED32; fmt: AL.ALenum; samples: SIGNED32);
 VAR
 	str: Strings.String;
 	res : AL.ALboolean;

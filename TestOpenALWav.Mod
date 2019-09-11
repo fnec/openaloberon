@@ -21,8 +21,8 @@ VAR
 	sourcePos, listenerPos, oldListenerPos, velocity: ARRAY [3] OF AL.ALfloat;
 	directionVect: ARRAY [6] OF AL.ALfloat; (* indices 0,1,2: listener forward direction. 3,4,5: listener up vectors *)
 
-PROCEDURE Delay(ms: LONGINT);
-VAR t0: LONGINT;
+PROCEDURE Delay(ms: SIGNED32);
+VAR t0: SIGNED32;
 BEGIN
 	t0 := Kernel.GetTicks() ;
 	WHILE ms + t0 < Kernel.GetTicks() DO END;
@@ -93,12 +93,12 @@ END Play3D;
 PROCEDURE LoadWav*(fname: ARRAY OF CHAR);
 VAR
 	fmt: AL.ALenum; 
-	dres: LONGINT;
+	dres: SIGNED32;
 	
 	file: Files.File;
 	in: Files.Reader;
 	sbuffer  : SoundDevices.Buffer;	
-	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : LONGINT;
+	nofChannels, samplePerSecond, bitsPerSample, samples, sizeBytes : SIGNED32;
 		
 BEGIN 
 	file := Files.Old(fname);
@@ -179,7 +179,7 @@ END LoadWav;
 
 (** *)
 PROCEDURE Play*;
-VAR istate: LONGINT;
+VAR istate: SIGNED32;
 BEGIN
 
 	AL.alSourcePlay(source);

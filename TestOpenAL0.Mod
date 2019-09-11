@@ -10,7 +10,7 @@ VAR
   buffer : AL.ALint;
   source : AL.ALuint;
  test : POINTER TO ARRAY OF CHAR;
-  z : LONGINT;
+  z : SIGNED32;
   
 BEGIN 
   
@@ -52,11 +52,11 @@ VAR
 	buffer : AL.ALint;
 	source : AL.ALuint;
 	data: POINTER TO ARRAY OF CHAR;
-	i : LONGINT;
-	x: REAL;
-	samples: LONGINT;
-	frequency: LONGINT;
-	size,  freq: LONGINT;
+	i : SIGNED32;
+	x: FLOAT32;
+	samples: SIGNED32;
+	frequency: SIGNED32;
+	size,  freq: SIGNED32;
 
 	srcPos, lstPos: ARRAY [3] OF AL.ALfloat;
 	
@@ -131,11 +131,11 @@ VAR
 	buffer : AL.ALint;
 	source : AL.ALuint;
 
-	test : POINTER TO ARRAY OF INTEGER; (* for 16 bits data*)
-	z : LONGINT;
-  	sizeBytes: LONGINT;
-  	y: REAL;
-  	freq: LONGINT;
+	test : POINTER TO ARRAY OF SIGNED16; (* for 16 bits data*)
+	z : SIGNED32;
+  	sizeBytes: SIGNED32;
+  	y: FLOAT32;
+  	freq: SIGNED32;
 BEGIN 
  
  NEW(test, 10000);
@@ -147,7 +147,7 @@ BEGIN
   END;  
 
   AL.alGenBuffers(1, ADDRESSOF(buffer));
-  sizeBytes := LEN(test)(AL.ALsizei)*SIZEOF(INTEGER);
+  sizeBytes := LEN(test)(AL.ALsizei)*SIZEOF(SIGNED16);
   
   AL.alBufferData(buffer, AL.AL_FORMAT_MONO16, ADDRESSOF(test[0]), sizeBytes, freq);
   	KernelLog.String("1-- alGetError= "); KernelLog.Hex(AL.alGetError(), 4); KernelLog.Ln; 

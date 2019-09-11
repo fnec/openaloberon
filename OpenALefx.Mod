@@ -675,8 +675,8 @@ CONST
 	
 	(* Listener parameter value ranges and defaults. *)
 
-	AL_MIN_METERS_PER_UNIT* = MIN(REAL);
-	AL_MAX_METERS_PER_UNIT* = MAX(REAL);
+	AL_MIN_METERS_PER_UNIT* = MIN(FLOAT32);
+	AL_MAX_METERS_PER_UNIT* = MAX(FLOAT32);
 	AL_DEFAULT_METERS_PER_UNIT* = 1.0;
 	
 	

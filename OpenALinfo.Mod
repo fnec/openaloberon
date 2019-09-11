@@ -16,7 +16,7 @@ VAR
 	context : AL.ALCcontext;
 	res: AL.ALboolean;
 	
-PROCEDURE checkALErrors(linenum=0: LONGINT): AL.ALenum;
+PROCEDURE checkALErrors(linenum=0: SIGNED32): AL.ALenum;
 BEGIN
 	err := AL.alGetError();
 	IF (err # AL.AL_NO_ERROR) THEN
@@ -28,7 +28,7 @@ BEGIN
 	RETURN err;
 END checkALErrors;
 
-PROCEDURE  checkALCErrors( device: AL.ALCdevice; linenum=0: LONGINT): AL.ALCenum;
+PROCEDURE  checkALCErrors( device: AL.ALCdevice; linenum=0: SIGNED32): AL.ALCenum;
 BEGIN
 	err := AL.alcGetError(device);
 	IF err # AL.ALC_NO_ERROR THEN
@@ -111,7 +111,7 @@ END printALInfo;
 PROCEDURE printResamplerInfo;
 VAR
     num_resamplers, def_resampler: AL.ALint;
-    i: LONGINT;
+    i: SIGNED32;
     name: Strings.String;
 BEGIN
     IF ~AL.alIsExtensionPresent("AL_SOFT_source_resampler") THEN
@@ -141,7 +141,7 @@ TYPE String64 = ARRAY 64 OF CHAR;
 VAR
 	major, minor, sends: AL.ALCint;
 	val: AL.ALenum;	
-	i: LONGINT;
+	i: SIGNED32;
 
 	filters: ARRAY 3 OF String64;
 	filterNames: ARRAY 3 OF String64;

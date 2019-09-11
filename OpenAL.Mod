@@ -21,15 +21,15 @@ TYPE
 	ALchar* = CHAR;
 	ALbyte* = SIGNED8;  (* signed 8-bit 2's complement integer *)
 	ALubyte* = UNSIGNED8;     (* 1-byte unsigned *)
-	ALshort* = INTEGER;  (* signed 16-bit 2's complement integer *)
+	ALshort* = SIGNED16;  (* signed 16-bit 2's complement integer *)
 	ALushort* = UNSIGNED16;     (* unsigned 16-bit integer *)
-	ALint* = LONGINT;  (* signed 32-bit 2's complement intege *)
+	ALint* = SIGNED32;  (* signed 32-bit 2's complement intege *)
 	ALuint* = UNSIGNED32;    (* unsigned 32-bit integer *)
-	ALsizei* = LONGINT;  (* non-negative 32-bit binary integer size *)
-	ALenum* = LONGINT; (* enumerated 32-bit value *)
+	ALsizei* = SIGNED32;  (* non-negative 32-bit binary integer size *)
+	ALenum* = SIGNED32; (* enumerated 32-bit value *)
 
-	ALfloat* = REAL; (* 32-bit IEEE754 floating-point *)
-	ALdouble* = LONGREAL; (* 64-bit IEEE754 floating-point *)
+	ALfloat* = FLOAT32; (* 32-bit IEEE754 floating-point *)
+	ALdouble* = FLOAT64; (* 64-bit IEEE754 floating-point *)
 	ALvoid* = ADDRESS; (* void type (for opaque pointers only) *)
 
 	PALboolean* = ADDRESS; (* POINTER TO ARRAY OF ALboolean;*)
@@ -418,7 +418,7 @@ TYPE
 	ALCcontext* = POINTER {UNTRACED, UNSAFE} TO RECORD END;
 	ALCdevice* = POINTER {UNTRACED, UNSAFE} TO RECORD END;
 
-   	PALCint* = PALint; (*  POINTER TO ARRAY OF ALCint; *)
+	PALCint* = PALint; (*  POINTER TO ARRAY OF ALCint; *)
 	PALCuint* = PALuint; (*  POINTER TO ARRAY OF ALCuint; *)
 
 CONST
@@ -886,7 +886,7 @@ END alcGetProcAddress;
 PROCEDURE GetStringFromAddr*(adr: ADDRESS): Strings.String;
 VAR s: POINTER {UNSAFE} TO ARRAY OF CHAR;
 	str: Strings.String;
-	pos: LONGINT;
+	pos: SIGNED32;
 BEGIN
 	s := adr;
 	pos := 0;
@@ -920,7 +920,7 @@ PROCEDURE GetDevStringFromAddr*(adr: ADDRESS): Strings.String;
 VAR 
 	pstr : POINTER {UNSAFE} TO ARRAY OF CHAR;
 	str: Strings.String;
-	pos: LONGINT; 
+	pos: SIGNED32; 
 BEGIN
 	pstr := adr;
 	pos := 0;
@@ -941,7 +941,7 @@ PROCEDURE ALCGetDeviceList*(device: ALCdevice; name: ALCenum): StringArray;
 VAR  
 	dynstr: StringArray;
 	pstr : POINTER {UNSAFE} TO ARRAY OF CHAR;
-	size: LONGINT; 
+	size: SIGNED32; 
 	adr: ADDRESS;
 	str : Strings.String;
 BEGIN
