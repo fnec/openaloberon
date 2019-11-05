@@ -612,7 +612,7 @@ VAR
 		
 		so, value type is changed to ALuint.
 	*)
-	(* alSourcei-: PROCEDURE{PlatformCC}(source : ALuint; param : ALenum; value : ALint); *)
+(*	alSourcei-: PROCEDURE{PlatformCC}(source : ALuint; param : ALenum; value : ALint); *)
 	alSourcei-: PROCEDURE{PlatformCC}(source : ALuint; param : ALenum; value : ALuint);
 	alSource3i-: PROCEDURE{PlatformCC}(source : ALuint; param : ALenum; v1, v2, v3 : ALint);
 	alSourceiv-: PROCEDURE{PlatformCC}(source : ALuint; param : ALenum; values : PALint);
@@ -884,17 +884,17 @@ END alcGetProcAddress;
 
 (* Get string from address *)
 PROCEDURE GetStringFromAddr*(adr: ADDRESS): Strings.String;
-VAR s: POINTER {UNSAFE} TO ARRAY OF CHAR;
+VAR s: POINTER {UNSAFE} TO ARRAY MAX(SIZE) OF CHAR;
 	str: Strings.String;
 	pos: SIGNED32;
 BEGIN
 	s := adr;
 	pos := 0;
 	IF adr # NIL THEN
-		WHILE s[pos] # 0X DO INC(pos); 	END;
+		WHILE s[pos] # 0X DO INC(pos); END;
 		NEW(str, pos + 1);
 		pos := 0;
-		WHILE s[pos] # 0X DO str[pos] := s[pos]; 	INC(pos); END;
+		WHILE s[pos] # 0X DO str[pos] := s[pos]; INC(pos); END;
 
 	ELSE NEW(str, 1);
 	END;
@@ -918,7 +918,7 @@ END alcGetString;
 
 PROCEDURE GetDevStringFromAddr*(adr: ADDRESS): Strings.String;
 VAR 
-	pstr : POINTER {UNSAFE} TO ARRAY OF CHAR;
+	pstr : POINTER {UNSAFE} TO ARRAY MAX(SIZE) OF CHAR;
 	str: Strings.String;
 	pos: SIGNED32; 
 BEGIN
@@ -940,7 +940,7 @@ END GetDevStringFromAddr;
 PROCEDURE ALCGetDeviceList*(device: ALCdevice; name: ALCenum): StringArray;
 VAR  
 	dynstr: StringArray;
-	pstr : POINTER {UNSAFE} TO ARRAY OF CHAR;
+	pstr : POINTER {UNSAFE} TO ARRAY MAX(SIZE) OF CHAR;
 	size: SIGNED32; 
 	adr: ADDRESS;
 	str : Strings.String;

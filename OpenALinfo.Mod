@@ -16,7 +16,7 @@ VAR
 	context : AL.ALCcontext;
 	res: AL.ALboolean;
 	
-PROCEDURE checkALErrors(linenum=0: SIGNED32): AL.ALenum;
+PROCEDURE checkALErrors(linenum := 0: SIGNED32): AL.ALenum;
 BEGIN
 	err := AL.alGetError();
 	IF (err # AL.AL_NO_ERROR) THEN
@@ -28,7 +28,7 @@ BEGIN
 	RETURN err;
 END checkALErrors;
 
-PROCEDURE  checkALCErrors( device: AL.ALCdevice; linenum=0: SIGNED32): AL.ALCenum;
+PROCEDURE  checkALCErrors(device: AL.ALCdevice; linenum := 0: SIGNED32): AL.ALCenum;
 BEGIN
 	err := AL.alcGetError(device);
 	IF err # AL.ALC_NO_ERROR THEN
